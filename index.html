@@ -1,0 +1,420 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <script
+  src="https://privacyportaltrial.onetrust.com/consent-embedded-forms/consent-receipt-scripts/OtFormStub.js"
+  data-id="0ceb7c0c-d27e-43c6-9c9c-877694285648"
+  worker="https://consent-api.onetrust.com"
+></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Snowflake-like Worksheet Mockup</title>
+  <style>
+    /* ===== Design tokens ===== */
+    :root{
+      --bg-app: #f6f7f9;
+      --bg-panel: #ffffff;
+      --bg-editor: #fbfcfe;
+      --bg-toolbar: #f2f4f7;
+      --border: #e5e7eb;
+      --border-strong: #d5d8df;
+      --text: #0f172a;
+      --text-dim: #475569;
+      --text-muted: #64748b;
+      --primary: #2c6bed;        /* Snowflake-y blue */
+      --primary-600: #2157c7;
+      --success: #12b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 10px;
+      --radius-sm: 8px;
+      --shadow: 0 1px 2px rgba(16,24,40,.08), 0 8px 20px rgba(16,24,40,.06);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;background:var(--bg-app);color:var(--text);font-family:var(--sans)}
+    body{margin:0;display:grid;grid-template-rows:auto 1fr}
+
+    /* ===== Top app header (brand + global actions) ===== */
+    .app-header{
+      position:sticky;top:0;z-index:20;
+      background:var(--bg-panel);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:var(--space-4);
+      padding:var(--space-3) var(--space-4);
+    }
+    .brand{
+      display:flex;align-items:center;gap:var(--space-2);
+      font-weight:600;color:var(--primary);
+    }
+    .brand svg{width:22px;height:22px}
+    .header-actions{margin-left:auto;display:flex;gap:var(--space-2)}
+    .btn{
+      appearance:none;border:1px solid var(--border);
+      background:#fff;color:var(--text);
+      padding:6px 10px;border-radius:8px;
+      display:inline-flex;align-items:center;gap:8px;
+      box-shadow:0 0 0 rgba(0,0,0,0);
+      cursor:pointer;
+    }
+    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .btn.icon{padding:6px}
+    .btn:active{transform:translateY(1px)}
+    .badge{background:#eef2ff;color:#3b82f6;border:1px solid #dbeafe;padding:2px 6px;border-radius:999px;font-size:12px}
+
+    /* ===== Main work area layout ===== */
+    .work-area{
+      display:grid;grid-template-columns:240px 1fr 360px;gap:var(--space-4);
+      padding:var(--space-4);
+    }
+
+    /* ===== Left nav ===== */
+    .sidebar{
+      background:var(--bg-panel);border:1px solid var(--border);
+      border-radius:var(--radius);box-shadow:var(--shadow);
+      display:flex;flex-direction:column;min-height:calc(100dvh - 120px);
+    }
+    .side-section{padding:var(--space-4) var(--space-4) var(--space-2);font-size:13px;color:var(--text-muted);text-transform:uppercase}
+    .side-list{padding:0;list-style:none;margin:0}
+    .side-item{
+      display:flex;align-items:center;gap:10px;padding:10px 16px;margin:2px 8px;border-radius:8px;color:var(--text);
+      cursor:pointer;
+    }
+    .side-item.active{background:#eef2ff;color:#1e40af}
+    .side-item svg{width:18px;height:18px;color:#64748b}
+
+    /* ===== Center column: worksheet header, editor, results ===== */
+    .center{
+      display:flex;flex-direction:column;gap:var(--space-4);
+    }
+    .worksheet-header{
+      background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+    }
+    .worksheet-header .bar{
+      display:flex;align-items:center;gap:var(--space-3);
+      padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border);
+    }
+    .worksheet-header .bar:last-child{border-bottom:none}
+    .pill{
+      display:inline-flex;gap:8px;align-items:center;
+      border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:#fff;color:#0f172a;font-size:13px;
+    }
+    .pill .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
+    .pill .dot.ok{background:var(--success)}
+    .bar .actions{margin-left:auto;display:flex;gap:8px}
+
+    /* ===== Editor ===== */
+    .editor{
+      background:var(--bg-editor);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:0;overflow:hidden;
+    }
+    .editor-toolbar{
+      display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg-toolbar);border-bottom:1px solid var(--border);
+    }
+    .editor-toolbar .spacer{flex:1}
+    .code{
+      display:grid;grid-template-columns:56px 1fr;gap:0;
+      font-family:var(--mono);font-size:13.5px;line-height:1.65;
+    }
+    .gutter{
+      background:#f8fafc;border-right:1px solid var(--border);color:#94a3b8;text-align:right;padding:10px 8px;
+    }
+    .code pre{
+      margin:0;padding:10px 12px;white-space:pre-wrap; /* wrap long lines for demo */
+      color:#0f172a;
+    }
+    /* lightweight “syntax” color */
+    .kw{color:#2563eb;font-weight:600}
+    .id{color:#0ea5e9}
+    .fn{color:#16a34a}
+    .str{color:#c2410c}
+    .num{color:#7c3aed}
+
+    /* ===== Results grid ===== */
+    .results{
+      background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .results-toolbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg-toolbar);border-bottom:1px solid var(--border)}
+    .results-toolbar .tab{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:#fff}
+    .results-toolbar .tab.active{background:#eef2ff;border-color:#c7d2fe;color:#1e3a8a}
+    
+    .table-wrap {
+      width: 100%;           /* or set a fixed width like 800px */
+      max-width: 90%;     /* optional: limit width */
+      height: 400px;         /* fixed height for screen and print */
+      overflow: auto;        /* adds scrollbars if content exceeds size */
+      border: 1px solid var(--border);
+    }
+
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    th, td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px}
+    thead th{background:#f8fafc;color:#334155;font-weight:600;position:sticky;top:0}
+    tbody tr:hover{background:#f9fafb}
+    td .status{display:inline-flex;align-items:center;gap:6px}
+    .status .dot{width:8px;height:8px;border-radius:999px;background:var(--success)}
+
+    .status-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    .status-active { background-color: var(--success); }
+    .status-withdrawn { background-color: var(--danger); }
+
+    /* ===== Right panel (query details) ===== */
+    .right{
+      background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+      display:flex;flex-direction:column;overflow:hidden;
+    }
+    .right .header{padding:12px 14px;border-bottom:1px solid var(--border);font-weight:600}
+    .right .content{padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+    .card{
+      background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;
+    }
+    .kv{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:13px}
+    .kv .label{color:var(--text-muted)}
+    .meter{height:8px;background:#eef2ff;border-radius:999px;overflow:hidden;border:1px solid #e5e7eb}
+    .meter > span{display:block;height:100%;width:48%;background:var(--primary)}
+
+    /* ===== Responsiveness ===== */
+    @media (max-width: 1380px){
+      .work-area{grid-template-columns:200px 1fr}
+      .right{display:none}
+    }
+    @media (max-width: 1040px){
+      .sidebar{display:none}
+      .work-area{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="brand" title="Snowflake (mock)">
+      <!-- Minimal snowflake-ish mark -->
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2v20M4 6l16 12M20 6L4 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Snowflake</span>
+      <span class="badge">Mock</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn icon" title="Notifications">🔔</button>
+      <button class="btn icon" title="Help">❓</button>
+      <button class="btn">Share</button>
+      <button class="btn primary">Run</button>
+    </div>
+  </header>
+
+  <!-- Work Area -->
+  <main class="work-area">
+    <!-- Left Nav -->
+    <aside class="sidebar" aria-label="Primary">
+      <div class="side-section">Work with data</div>
+      <ul class="side-list">
+        <li class="side-item active">📁 Projects</li>
+        <li class="side-item">🗂 Databases</li>
+        <li class="side-item">📝 Worksheets</li>
+        <li class="side-item">📡 Data</li>
+        <li class="side-item">🤖 AI & ML</li>
+        <li class="side-item">🔁 Data Exchange</li>
+        <li class="side-item">📇 Catalog</li>
+        <li class="side-item">🛡️ Governance & Security</li>
+        <li class="side-item">⚙️ Compute</li>
+        <li class="side-item">🔧 Admin</li>
+      </ul>
+      <div class="side-section">Recent</div>
+      <ul class="side-list">
+        <li class="side-item">2025-12-05 2:45pm</li>
+        <li class="side-item">2025-12-04 9:12pm</li>
+        <li class="side-item">2025-12-01 11:07am</li>
+      </ul>
+    </aside>
+
+    <!-- Center Column -->
+    <section class="center">
+      <!-- Worksheet “top bars” -->
+      <div class="worksheet-header">
+        <div class="bar">
+          <span class="pill"><span class="dot ok"></span> <strong>MONOLITH</strong> • <span class="text-dim">SWITZERLAND-NORTH</span></span>
+          <span class="pill">DB: <strong>CONSENT_APP</strong></span>
+          <span class="pill">Role: <strong>ANALYST</strong></span>
+          <div class="actions">
+            <button class="btn">+ Worksheet</button>
+            <button class="btn">Save</button>
+          </div>
+        </div>
+        <div class="bar">
+          <span class="pill">Worksheet • <strong>CONSUMER_PREFS</strong></span>
+          <div class="actions">
+            <button class="btn">Format SQL</button>
+            <button class="btn">Explain</button>
+            <button class="btn">History</button>
+            <button class="ot-open-webform" id="ot-c9322d35-cb63-4974-b65a-5d415f818a05">Open web form</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SQL Editor -->
+      <div class="editor" role="group" aria-label="SQL editor">
+        <div class="editor-toolbar">
+          <strong>Query 1</strong>
+          <span class="spacer"></span>
+          <button class="btn">Run ▶</button>
+          <button class="btn">Stop ⏹</button>
+          <button class="btn">Save ⌘S</button>
+        </div>
+        <div class="code">
+          <div class="gutter" aria-hidden="true">
+            1<br>2<br>3<br>4<br>5<br>6<br>7<br>
+          </div>
+          <pre><span class="kw">SELECT</span> <span class="id">*</span>
+<span class="kw">FROM</span> <span class="id">CONSENT_APP</span>.<span class="id">APP_DATA</span>.<span class="id">DATASUBJECTPROFILE</span> <span class="kw">AS</span> <span class="id">p</span>
+<span class="kw">WHERE</span> <span class="id">p</span>.<span class="id">CONSENT_TYPE</span> = <span class="str">'ACTIVE'</span>
+<span class="kw">ORDER</span> <span class="kw">BY</span> <span class="id">p</span>.<span class="id">SUBJECT_ID</span>;
+-- Mocked editor: styling approximates Snowflake. No JS required.
+</pre>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="results">
+        <div class="results-toolbar">
+          <!-- toolbar buttons -->
+        </div>
+        <!-- Replace the old table-wrap with this -->
+        <div class="table-wrap" id="results-container">
+          <!-- API table will be injected here -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right Panel -->
+    <aside class="right" aria-label="Query details">
+      <div class="header">Query Details</div>
+      <div class="content">
+        <div class="card">
+          <div class="kv">
+            <div class="label">Warehouse</div><div>COMPUTE_WH</div>
+            <div class="label">Duration</div><div>276ms</div>
+            <div class="label">Rows</div><div>128</div>
+            <div class="label">Credits</div><div>0.014</div>
+          </div>
+          <div class="meter" aria-label="Credits meter"><span></span></div>
+        </div>
+        <div class="card">
+          <strong>SQL</strong>
+          <pre style="font-family:var(--mono);margin:6px 0 0;color:#334155">
+SELECT * FROM CONSENT_APP.APP_DATA.DATASUBJECTPROFILE p
+WHERE p.CONSENT_TYPE = 'ACTIVE'
+ORDER BY p.SUBJECT_ID;</pre>
+        </div>
+        <div class="card">
+          <strong>Columns</strong>
+          <div class="kv" style="margin-top:6px">
+            <div class="label">SUBJECT_ID</div><div>NUMBER</div>
+            <div class="label">EMAIL</div><div>TEXT</div>
+            <div class="label">PURPOSE_NAME</div><div>TEXT</div>
+            <div class="label">CONSENT_TYPE</div><div>TEXT</div>
+            <div class="label">PREFERENCES</div><div>VARIANT</div>
+            <div class="label">UPDATED_AT</div><div>TIMESTAMP_TZ</div>
+          </div>
+        </div>
+        <!-- New card for inputs -->
+        <div class="card" style="margin-top:12px;">
+          <strong>Configuration</strong>
+          <div class="kv" style="margin-top:6px">
+            <div class="label">URL Endpoint</div>
+            <div><input type="text" id="url-endpoint" placeholder="Enter API URL" value="https://default9d1d17d8372b4b23a9fc1e5d895c89.a1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a3eaffa116ac4c0cb3d7d5dc86724a8f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5X3nvYDfsc1yBZYsz6SEYNA5ZfmZf4wODLLXHMyaO4" style="width:100%; padding:6px; border:1px solid #ccc; border-radius:6px;"></div>
+
+            <div class="label">Username</div>
+            <div><input type="text" id="username" placeholder="Enter username" value="alvaro.barrosomato@onetrust.com" style="width:100%; padding:6px; border:1px solid #ccc; border-radius:6px;"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+<script>
+
+
+
+  async function refreshResults() {
+    
+try {
+      // 1) Read values from inputs
+      const urlInput = document.getElementById('url-endpoint');
+      const userInput = document.getElementById('username');
+
+      const apiUrl = (urlInput?.value || '').trim();
+      const username = (userInput?.value || '').trim();
+
+      if (!apiUrl) {
+        document.getElementById('results-container').innerHTML =
+          '<p style="color:#ef4444;">Please enter a valid URL Endpoint.</p>';
+        return;
+      }
+
+      // 2) Build a URL that includes username as a query param (optional)
+      //    If your endpoint expects a header instead, see the headers section below.
+      const url = new URL(apiUrl);
+      if (username) {
+        url.searchParams.set('username', username);
+      }
+
+      // 3) Fetch the table HTML (use headers if your API needs username there)
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          // Pass the username in a custom header if your flow expects it that way:
+          // 'x-username': username,
+          // If your endpoint is Power Automate with manual trigger and supports
+          // query params only, you can comment out the header above.
+          'Accept': 'text/html'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const html = await response.text();
+      document.getElementById('results-container').innerHTML = html;
+
+        // Add colored dots in CONSENT_TYPE column (6th column)
+        document.querySelectorAll('#results-container td:nth-child(6)').forEach(cell => {
+          const consent = cell.textContent.trim().toUpperCase();
+          let dotClass = '';
+          if (consent === 'ACTIVE') {
+            dotClass = 'status-active';
+          } else if (consent === 'WITHDRAWN') {
+            dotClass = 'status-withdrawn';
+          }
+          if (dotClass) {
+            cell.innerHTML = `<span class="status-dot ${dotClass}"></span>${consent}`;
+          }
+        });
+      } catch (error) {
+        console.error('Error refreshing table:', error);
+        document.getElementById('results-container').innerHTML = '<p style="color:red;">Failed to load table.</p>';
+
+
+      }
+    }
+
+    document.querySelector('.btn.primary').addEventListener('click', refreshResults);
+    refreshResults(); // Load initial data
+
+  </script>
+
+
+</body>
+</html>
