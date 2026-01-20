@@ -4,717 +4,312 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/x-icon" href="SnowflakeFavicon.png">
-  <title>Snowfake Worksheet Mockup</title>
+  <title>UCPM Integration Simulator</title>
+  <meta name="description" content="Showcase Onetrust UCPM integrations in resilient simulated environments for CRMs, data lakes, and more." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24'%3E%3Cpath fill='%232e7cf6' d='M12 2l8.5 4.9v9.9L12 22l-8.5-4.9V6.9z'/%3E%3Cpath fill='%23fff' d='M7.5 9.75h9v1.5h-9zm0 3h6v1.5h-6z'/%3E%3C/svg%3E">
+
   <style>
-    /* ===== Design tokens ===== */
     :root{
-      --bg-app: #f6f7f9;
-      --bg-panel: #ffffff;
-      --bg-editor: #fbfcfe;
-      --bg-toolbar: #f2f4f7;
-      --border: #e5e7eb;
-      --border-strong: #d5d8df;
-      --text: #0f172a;
-      --text-dim: #475569;
-      --text-muted: #64748b;
-      --primary: #2c6bed;
-      --primary-600: #2157c7;
-      --success: #12b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --cyan: #06b6d4;
-      --grey: #9ca3af;
-      --radius: 10px;
-      --radius-sm: 8px;
-      --shadow: 0 1px 2px rgba(16,24,40,.08), 0 8px 20px rgba(16,24,40,.06);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      --sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px;
+      --bg: #0b0c10;
+      --card: #121419;
+      --text: #e8eef7;
+      --muted: #a7b1c2;
+      --border: #1e222b;
+      --brand: #2e7cf6;
+      --brand-2: #00c2ff;
+      --shadow: 0 6px 30px rgba(0,0,0,.35);
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f7f9fc;
+        --card: #ffffff;
+        --text: #1c2333;
+        --muted: #5b657a;
+        --border: #e6eaf2;
+        --shadow: 0 8px 28px rgba(16,24,40,.08);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(46,124,246,.12), transparent 60%),
+                  radial-gradient(1200px 600px at 110% 10%, rgba(0,194,255,.10), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.45;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%;background:var(--bg-app);color:var(--text);font-family:var(--sans)}
-    body{margin:0;display:grid;grid-template-rows:auto 1fr}
-
-    /* ===== App header ===== */
-    .app-header{
-      position:sticky;top:0;z-index:20;background:var(--bg-panel);
-      border-bottom:1px solid var(--border);
-      display:flex;align-items:center;gap:var(--space-4);
-      padding:var(--space-3) var(--space-4);
+    header {
+      padding: 40px 24px 16px;
+      max-width: 1100px;
+      margin: 0 auto;
     }
-    .brand{display:flex;align-items:center;gap:var(--space-2);font-weight:600;color:var(--primary)}
-    .brand svg{width:22px;height:22px}
-    .header-actions{margin-left:auto;display:flex;gap:var(--space-2)}
-    .btn{
-      appearance:none;border:1px solid var(--border);
-      background:#fff;color:var(--text);
-      padding:6px 10px;border-radius:8px;
-      display:inline-flex;align-items:center;gap:8px;
-      cursor:pointer;transition:transform .02s, background .15s;
+    .title {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
     }
-    .btn:hover{background:#f8fafc}
-    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
-    .btn.primary:hover{background:var(--primary-600)}
-    .btn.icon{padding:6px}
-    .btn:active{transform:translateY(1px)}
-    .badge{background:#eef2ff;color:#3b82f6;border:1px solid #dbeafe;padding:2px 6px;border-radius:999px;font-size:12px}
-
-    /* ===== Layout ===== */
-    .work-area{display:grid;grid-template-columns:240px 1fr 360px;gap:var(--space-4);padding:var(--space-4)}
-
-    .sidebar{
-      background:var(--bg-panel);border:1px solid var(--border);
-      border-radius:var(--radius);box-shadow:var(--shadow);
-      display:flex;flex-direction:column;min-height:calc(100dvh - 120px);
+    .title h1 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 36px);
+      letter-spacing: .2px;
+      font-weight: 700;
     }
-    .side-section{padding:var(--space-4) var(--space-4) var(--space-2);font-size:13px;color:var(--text-muted);text-transform:uppercase}
-    .side-list{padding:0;list-style:none;margin:0}
-    .side-item{
-      display:flex;align-items:center;gap:10px;padding:10px 16px;margin:2px 8px;border-radius:8px;color:var(--text);
-      cursor:pointer;
+    .title .badge {
+      font-size: 12px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.03));
     }
-    .side-item.active{background:#eef2ff;color:#1e40af}
-
-    .center{display:flex;flex-direction:column;gap:var(--space-4)}
-    .worksheet-header{
-      background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 80ch;
     }
-    .worksheet-header .bar{
-      display:flex;align-items:center;gap:var(--space-3);
-      padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border);
+
+    .toolbar { display: flex; gap: 12px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+    .search { position: relative; flex: 1 1 320px; min-width: 240px; }
+    .search input {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      box-shadow: var(--shadow);
     }
-    .worksheet-header .bar:last-child{border-bottom:none}
-    .pill{
-      display:inline-flex;gap:8px;align-items:center;
-      border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:#fff;color:#0f172a;font-size:13px;
+    .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .6; }
+    .view-btns { display: flex; gap: 8px; }
+    .view-btns button {
+      background: var(--card); color: var(--muted);
+      border: 1px solid var(--border); padding: 10px 12px; border-radius: 10px; cursor: pointer;
     }
-    .pill .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
-    .pill .dot.ok{background:var(--success)}
-    .bar .actions{margin-left:auto;display:flex;gap:8px}
+    .view-btns button.active { color: var(--text); border-color: #2b3342; }
 
-    /* ===== Editor ===== */
-    .editor{
-      background:var(--bg-editor);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
-      padding:0;overflow:hidden;
+    main { max-width: 1100px; margin: 0 auto; padding: 10px 24px 60px; }
+
+    /* Grid for cards */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
+
+    .card {
+      display: flex; flex-direction: column; gap: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.04)), var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px; box-shadow: var(--shadow);
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
     }
-    .editor-toolbar{
-      display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg-toolbar);border-bottom:1px solid var(--border);
+    .card:hover { transform: translateY(-2px); border-color: #2c3444; box-shadow: 0 10px 36px rgba(0,0,0,.45); }
+    .card-head { display: flex; align-items: center; gap: 12px; }
+    .card-head img { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; background: #fff; border: 1px solid var(--border); }
+    .card h3 { margin: 0; font-size: 16px; }
+    .card p { margin: 0; color: var(--muted); font-size: 13px; min-height: 36px; }
+
+    /* Actions: favicon button + new tab */
+    .actions { display: flex; gap: 10px; align-items: center; margin-top: 6px; }
+    .icon-button {
+      width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 10px; border: 1px solid var(--border); background: #0f1420; padding: 0; cursor: pointer;
+      box-shadow: var(--shadow);
     }
-    .editor-toolbar .spacer{flex:1}
-    .code{
-      display:grid;grid-template-columns:56px 1fr;gap:0;
-      font-family:var(--mono);font-size:13.5px;line-height:1.65;
+    .icon-button:hover { border-color: #3a4356; transform: translateY(-1px); }
+    .icon-button img { width: 20px; height: 20px; object-fit: contain; background: transparent; border: 0; }
+    .btn {
+      text-decoration: none; font-size: 13px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border);
+      color: var(--text); background: #1a1f2b; display: inline-flex; align-items: center; gap: 8px;
     }
-    .gutter{
-      background:#f8fafc;border-right:1px solid var(--border);color:#94a3b8;text-align:right;padding:10px 8px;
-    }
-    .code pre{margin:0;padding:10px 12px;white-space:pre-wrap;color:#0f172a}
-    .kw{color:#2563eb;font-weight:600}
-    .id{color:#0ea5e9}
-    .str{color:#c2410c}
+    .btn.secondary { background: transparent; color: var(--muted); }
+    .tags { color: var(--muted); font-size: 12px; }
 
-    /* ===== Results + table ===== */
-    .results{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .results-toolbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg-toolbar);border-bottom:1px solid var(--border)}
-    .results-toolbar .tab{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:#fff}
-    .results-toolbar .tab.active{background:#eef2ff;border-color:#c7d2fe;color:#1e3a8a}
-    .results-toolbar .spacer{flex:1}
-    .toolbar-input{padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;min-width:240px;background:#fff}
-    .toolbar-select{padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff}
+    .meta { margin-top: 20px; color: var(--muted); font-size: 12px; text-align: center; }
+    footer { border-top: 1px dashed var(--border); max-width: 1100px; margin: 0 auto; padding: 14px 24px 40px; color: var(--muted); font-size: 12px; }
 
-    .legend { display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:12px;color:var(--text-muted); padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg-toolbar) }
-    .legend-item { display:inline-flex;align-items:center;gap:6px }
-    .status-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; position:relative; top:1px; }
-    .status-active    { background-color: var(--success); }
-    .status-withdrawn { background-color: var(--danger); }
-    .status-notoptout { background-color: var(--cyan); }
-    .status-pending   { background-color: var(--warning); }
-    .status-expired   { background-color: var(--grey); }
+    /* Table view */
+    .table { width: 100%; border-collapse: collapse; display: none; margin-top: 24px; }
+    .table th, .table td { border-bottom: 1px solid var(--border); padding: 10px 8px; text-align: left; vertical-align: middle; }
+    .table th { color: var(--muted); font-weight: 600; }
+    .table .open-cell { display: flex; gap: 8px; align-items: center; }
+    .table a { color: var(--brand); text-decoration: none; }
+    .table .open { padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: #1a1f2b; }
 
-    .table-wrap { width:100%; height:420px; overflow:auto; border-top:1px solid var(--border); background:#fff }
-
-    table{ width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed }
-    /* Fixed column widths (EMAIL removed; redistribute space) */
-    col.col-id      { width:18% }
-    col.col-subject { width:24% }
-    col.col-purpose { width:26% }
-    col.col-consent { width:10% }
-    col.col-prefs   { width:16% }
-    col.col-updated { width:6% }
-
-    th, td{
-      padding:10px 12px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:top;
-      overflow-wrap:anywhere; word-break:break-word;
-    }
-    thead th{ background:#f8fafc; color:#334155; font-weight:600; position:sticky; top:0; z-index:1 }
-    tbody tr:hover{background:#f9fafb}
-    .cell-mono{ font-family:var(--mono) }
-    pre.compact{ white-space:pre-wrap; margin:0 }
-
-    /* Preference chips */
-    .chip{
-      display:inline-block;border:1px solid var(--border);
-      border-radius:999px;padding:2px 8px;margin:2px 6px 0 0;
-      background:#f8fafc;color:#334155;font-size:12px;line-height:1.2;
-    }
-    .chip.on{ background:#ecfdf5; color:#065f46; border-color:#a7f3d0 }
-
-    /* Pagination */
-    .pagination{
-      display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--border);background:#fff;flex-wrap:wrap
-    }
-    .pagination .range{color:var(--text-muted);font-size:12px;margin-right:auto}
-    .pagination .btn{padding:4px 8px}
-    .pagination .btn:disabled{opacity:.5;cursor:not-allowed}
-    .size-select{padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff}
-
-    /* Right panel */
-    .right{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
-    .right .header{padding:12px 14px;border-bottom:1px solid var(--border);font-weight:600}
-    .right .content{padding:12px 14px;display:flex;flex-direction:column;gap:12px}
-    .card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px}
-    .kv{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:13px}
-    .kv .label{color:var(--text-muted)}
-    .meter{height:8px;background:#eef2ff;border-radius:999px;overflow:hidden;border:1px solid #e5e7eb}
-    .meter > span{display:block;height:100%;width:48%;background:var(--primary)}
-
-    /* Responsive */
-    @media (max-width: 1380px){ .work-area{grid-template-columns:200px 1fr} .right{display:none} }
-    @media (max-width: 1040px){ .sidebar{display:none} .work-area{grid-template-columns:1fr} }
-
-    @media print{
-      .table-wrap{height:auto!important;overflow:visible!important;border:none!important}
-      thead th{position:static!important}
-      .pagination{display:none!important}
-    }
+    /* Accessibility helpers */
+    :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
+    kbd { background: #0f1420; border: 1px solid var(--border); border-bottom-width: 2px; padding: 2px 6px; border-radius: 6px; font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="app-header">
-    <div class="brand" title="Snowfake (mock)">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 2v20M4 6l16 12M20 6L4 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      <span>Snowfake</span>
-      <span class="badge">Mock</span>
+  <header>
+    <div class="title">
+      <h1>UCPM Integration Simulator</h1>
+      <span class="badge">Index</span>
     </div>
-    <div class="header-actions">
-      <button class="btn icon" title="Notifications">🔔</button>
-      <button class="btn icon" title="Help">❓</button>
-      <button class="btn">Share</button>
-      <button class="btn primary" title="Run (global)" id="run-global">Run</button>
+    <p class="subtitle">
+      Use this simulator to showcase integrations for your Onetrust UCPM projects and trials in safe, resilient, and
+      **unbreakable** demo environments—mirroring CRMs, data lakes, and other platforms—so you can activate, validate,
+      and demo end‑to‑end flows without risking production systems.
+    </p>
+
+    <div class="toolbar" role="region" aria-label="Toolbar">
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M21 21l-4.2-4.2M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <input id="search" type="search" placeholder="Search interfaces… (e.g., snowflake, salesforce)" aria-label="Search interfaces" />
+      </div>
+      <div class="view-btns" role="group" aria-label="Toggle view">
+        <button id="btnCards" class="active" type="button" title="Cards view">Cards</button>
+        <button id="btnTable" type="button" title="Table view">Table</button>
+      </div>
     </div>
   </header>
 
-  <main class="work-area">
-    <!-- Sidebar -->
-    <aside class="sidebar" aria-label="Primary">
-      <div class="side-section">Work with data</div>
-      <ul class="side-list">
-        <li class="side-item active">📁 Projects</li>
-        <li class="side-item">🗂 Databases</li>
-        <li class="side-item">📝 Worksheets</li>
-        <li class="side-item">📡 Data</li>
-        <li class="side-item">🤖 AI &amp; ML</li>
-        <li class="side-item">🔁 Data Exchange</li>
-        <li class="side-item">📇 Catalog</li>
-        <li class="side-item">🛡️ Governance &amp; Security</li>
-        <li class="side-item">⚙️ Compute</li>
-        <li class="side-item">🔧 Admin</li>
-      </ul>
-      <div class="side-section">Recent</div>
-      <ul class="side-list">
-        <li class="side-item">2025-12-05 2:45pm</li>
-        <li class="side-item">2025-12-04 9:12pm</li>
-        <li class="side-item">2025-12-01 11:07am</li>
-      </ul>
-    </aside>
+  <main>
+    <!-- Cards grid -->
+    <section id="cards" class="grid" aria-live="polite"></section>
 
-    <!-- Center -->
-    <section class="center">
-      <!-- Worksheet header -->
-      <div class="worksheet-header">
-        <div class="bar">
-          <span class="pill"><span class="dot ok"></span> <strong>MONOLITH</strong> • <span class="text-dim">SWITZERLAND-NORTH</span></span>
-          <span class="pill">DB: <strong>CONSENT_APP</strong></span>
-          <span class="pill">Role: <strong>ANALYST</strong></span>
-          <div class="actions">
-            <button class="btn">+ Worksheet</button>
-            <button class="btn">Save</button>
-          </div>
-        </div>
-        <div class="bar">
-          <span class="pill">Worksheet • <strong>CONSUMER_PREFS</strong></span>
-          <div class="actions">
-            <button class="btn">Format SQL</button>
-            <button class="btn">Explain</button>
-            <button class="btn">History</button>
-            <button class="ot-open-webform" id="ot-c9322d35-cb63-4974-b65a-5d415f818a05">Open web form</button>
-          </div>
-        </div>
-      </div>
+    <!-- Table view -->
+    <table id="table" class="table" aria-live="polite">
+      <thead>
+        <tr>
+          <th style="width:42px;">Open</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Tags</th>
+          <th style="width:120px;">New tab</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-      <!-- SQL Editor -->
-      <div class="editor" role="group" aria-label="SQL editor">
-        <div class="editor-toolbar">
-          <strong>Query 1</strong>
-          <span class="spacer"></span>
-          <button class="btn" id="run-query">Run ▶</button>
-          <button class="btn">Stop ⏹</button>
-          <button class="btn">Save ⌘S</button>
-        </div>
-        <div class="code">
-          <div class="gutter" aria-hidden="true">1<br>2<br>3<br>4<br>5<br>6<br>7<br></div>
-<pre><span class="kw">SELECT</span> <span class="id">*</span>
-<span class="kw">FROM</span> <span class="id">CONSENT_APP</span>.<span class="id">APP_DATA</span>.<span class="id">DATASUBJECTPROFILE</span> <span class="kw">AS</span> <span class="id">p</span>
-<span class="kw">WHERE</span> <span class="id">p</span>.<span class="id">CONSENT_TYPE</span> = <span class="str">'ACTIVE'</span>
-<span class="kw">ORDER</span> <span class="kw">BY</span> <span class="id">p</span>.<span class="id">SUBJECT_ID</span>;
--- Mocked editor only.
-</pre>
-        </div>
-      </div>
-
-      <!-- Results -->
-      <div class="results">
-        <div class="results-toolbar">
-          <span class="tab active">Results</span>
-          <input class="toolbar-input" id="filter-text" type="text" placeholder="Filter (subject/purpose)..." />
-          <select class="toolbar-select" id="filter-consent">
-            <option value="">All statuses</option>
-            <option>ACTIVE</option>
-            <option>WITHDRAWN</option>
-            <option>NOT_OPT_OUT</option>
-            <option>PENDING</option>
-            <option>EXPIRED</option>
-          </select>
-          <button class="btn" id="clear-filters">Clear</button>
-          <span class="spacer"></span>
-          <button class="btn" id="export-csv">Export CSV</button>
-        </div>
-
-        <div id="legend" class="legend"></div>
-
-        <div class="table-wrap">
-          <table id="results-table">
-            <colgroup>
-              <col class="col-id" />
-              <col class="col-subject" />
-              <col class="col-purpose" />
-              <col class="col-consent" />
-              <col class="col-prefs" />
-              <col class="col-updated" />
-            </colgroup>
-            <thead id="thead"></thead>
-            <tbody id="tbody"></tbody>
-          </table>
-        </div>
-
-        <div class="pagination">
-          <div class="range" id="page-range">—</div>
-          <label style="display:flex;align-items:center;gap:8px">
-            Rows per page
-            <select class="size-select" id="page-size">
-              <option value="10">10</option>
-              <option value="25" selected>25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </label>
-          <button class="btn" id="first-page" title="First">⏮</button>
-          <button class="btn" id="prev-page" title="Previous">◀</button>
-          <button class="btn" id="next-page" title="Next">▶</button>
-          <button class="btn" id="last-page" title="Last">⏭</button>
-        </div>
-
-        <div id="rowcount" style="padding:8px 12px;color:var(--text-muted);font-size:12px;border-top:1px solid var(--border)"></div>
-      </div>
-    </section>
-
-    <!-- Right Panel -->
-    <aside class="right" aria-label="Query details">
-      <div class="header">Query Details</div>
-      <div class="content">
-        <div class="card">
-          <div class="kv">
-            <div class="label">Warehouse</div><div>COMPUTE_WH</div>
-            <div class="label">Duration</div><div>276ms</div>
-            <div class="label">Rows</div><div id="rows-value">—</div>
-            <div class="label">Credits</div><div>0.014</div>
-          </div>
-          <div class="meter" aria-label="Credits meter"><span></span></div>
-        </div>
-        <div class="card">
-          <strong>SQL</strong>
-          <pre style="font-family:var(--mono);margin:6px 0 0;color:#334155"></pre>
-        </div>
-        <div class="card">
-          <strong>Columns</strong>
-          <div class="kv" style="margin-top:6px">
-            <div class="label">ItemInternalId</div><div>TEXT</div>
-            <div class="label">SUBJECT_ID</div><div>TEXT</div>
-            <div class="label">PURPOSE_NAME</div><div>TEXT</div>
-            <div class="label">CONSENT_TYPE</div><div>TEXT</div>
-            <div class="label">PREFERENCES</div><div>VARIANT</div>
-            <div class="label">UPDATED_AT</div><div>TIMESTAMP_TZ</div>
-          </div>
-        </div>
-
-        <!-- Config -->
-        <div class="card" style="margin-top:12px;">
-          <strong>Configuration</strong>
-          <div class="kv" style="margin-top:6px">
-            <div class="label">URL Endpoint</div>
-            <div>
-              <input
-                type="text"
-                id="url-endpoint"
-                placeholder="Enter API URL"
-                value="https://default9d1d17d8372b4b23a9fc1e5d895c89.a1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a3eaffa116ac4c0cb3d7d5dc86724a8f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5X3nvYDfsc1yBZYsz6SEYNA5ZfmZf4wODLLXHMyaO4"
-                style="width:100%; padding:6px; border:1px solid #ccc; border-radius:6px;"
-              />
-            </div>
-            <div class="label">Username</div>
-            <div>
-              <input
-                type="text"
-                id="username"
-                placeholder="Enter username"
-                value="alvaro.barrosomato@onetrust.com"
-                style="width:100%; padding:6px; border:1px solid #ccc; border-radius:6px;"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </aside>
+    <p id="empty" class="meta" style="display:none;">No results. Try a different search term.</p>
   </main>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Inputs & actions
-  const urlInput = document.getElementById('url-endpoint');
-  const userInput = document.getElementById('username');
-  const runEditor = document.getElementById('run-query');
-  const runGlobal = document.getElementById('run-global');
+  <footer>
+    <div class="meta">
+      Tip: Press <kbd>/</kbd> to focus search. Use <kbd>Enter</kbd> to open the first result.<br />
+      Project developed by <strong>Alvaro Barroso Mato</strong> —
+      <a href="mailto:alvaro.barrosomato@onetrust.com">alvaro.barrosomato@onetrust.com</a>
+    </div>
+  </footer>
 
-  // Filters
-  const filterText = document.getElementById('filter-text');
-  const filterConsent = document.getElementById('filter-consent');
-  const clearFiltersBtn = document.getElementById('clear-filters');
-  const exportBtn = document.getElementById('export-csv');
-
-  // Table pieces
-  const thead = document.getElementById('thead');
-  const tbody = document.getElementById('tbody');
-  const rowCount = document.getElementById('rowcount');
-  const rowsValue = document.getElementById('rows-value');
-
-  // Pagination
-  const firstBtn = document.getElementById('first-page');
-  const prevBtn  = document.getElementById('prev-page');
-  const nextBtn  = document.getElementById('next-page');
-  const lastBtn  = document.getElementById('last-page');
-  const pageRange = document.getElementById('page-range');
-  const pageSizeSel = document.getElementById('page-size');
-
-  // Legend
-  const legend = document.getElementById('legend');
-
-  // Fixed column order (EMAIL removed)
-  const COLUMN_ORDER = [
-    'ItemInternalId','SUBJECT_ID','PURPOSE_NAME','CONSENT_TYPE','PREFERENCES','UPDATED_AT'
-  ];
-
-  // Data state
-  let allRows = [];
-  let filtered = [];
-  let pageIndex = 0;
-  let pageSize = parseInt(pageSizeSel.value, 10) || 25;
-
-  // Persist inputs
-  try {
-    urlInput.value  = localStorage.getItem('apiUrl')  || urlInput.value || '';
-    userInput.value = localStorage.getItem('username') || userInput.value || '';
-  } catch {}
-
-  // ---------- Utils ----------
-  function escapeHtml(s) {
-    return String(s ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-  }
-  function sanitizeHtml(unsafeHtml) {
-    const tmp = document.implementation.createHTMLDocument('');
-    tmp.body.innerHTML = unsafeHtml;
-    tmp.body.querySelectorAll('script, style').forEach(n => n.remove());
-    tmp.body.querySelectorAll('*').forEach(el => {
-      [...el.attributes].forEach(attr => {
-        const name = attr.name.toLowerCase();
-        const val  = (attr.value || '').trim().toLowerCase();
-        if (name.startsWith('on')) el.removeAttribute(attr.name);
-        if ((name === 'href' || name === 'src') && val.startsWith('javascript:')) {
-          el.removeAttribute(attr.name);
-        }
-      });
-    });
-    return tmp.body.innerHTML;
-  }
-
-  const CONSENT_STYLES = {
-    'ACTIVE':        'status-active',
-    'WITHDRAWN':     'status-withdrawn',
-    'NOT_OPT_OUT':   'status-notoptout',
-    'PENDING':       'status-pending',
-    'EXPIRED':       'status-expired'
-  };
-  function renderLegend(){
-    legend.innerHTML = `
-      <div class="legend">
-        <strong style="font-size:12px;color:var(--text-muted)">Legend:</strong>
-        ${Object.entries(CONSENT_STYLES).map(([label, cls]) => `
-          <span class="legend-item"><span class="status-dot ${cls}"></span>${escapeHtml(label)}</span>
-        `).join('')}
-      </div>
-    `;
-  }
-  function consentCell(consentRaw){
-    const v = String(consentRaw || '').toUpperCase();
-    const cls = CONSENT_STYLES[v] || '';
-    return `<span class="status-dot ${cls}"></span>${escapeHtml(v)}`;
-  }
-  function fmtDateLocal(iso){
-    if (!iso) return '';
-    const d = new Date(iso);
-    return isNaN(d) ? escapeHtml(iso)
-      : d.toLocaleString(undefined, { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
-  }
-  function parsePrefs(value){
-    if (value == null || value === '') return [];
-    if (Array.isArray(value)) return value;
-    if (typeof value === 'object') return value;
-    const s = String(value).trim();
-    if (!s) return [];
-    try { const parsed = JSON.parse(s); return Array.isArray(parsed) ? parsed : [parsed]; }
-    catch { return String(value); }
-  }
-  function renderPreferencesCell(value){
-    const parsed = parsePrefs(value);
-    if (typeof parsed === 'string') return `<pre class="compact">${escapeHtml(parsed)}</pre>`;
-    if (Array.isArray(parsed) && parsed.length === 0) return '[]';
-    if (Array.isArray(parsed)) {
-      let html = '';
-      for (const pref of parsed) {
-        const title = escapeHtml(pref?.name ?? pref?.guid ?? 'Preference');
-        html += `<div style="margin-bottom:6px">
-          <div style="font-weight:600">${title}</div>`;
-        if (Array.isArray(pref?.options) && pref.options.length) {
-          html += `<div>`;
-          for (const opt of pref.options) {
-            const on = String(opt?.value).toLowerCase() === 'true';
-            html += `<span class="chip ${on ? 'on':''}">${escapeHtml(opt?.name ?? '')}: ${on ? 'On':'Off'}</span>`;
-          }
-          html += `</div>`;
-        }
-        html += `</div>`;
+  <script>
+    // ---- Configuration: list your interfaces here ----
+    // If your icons are in the repo root, change icon to "SalesforceFavicon.png" / "SnowflakeFavicon.png".
+    const interfaces = [
+      {
+        name: "Salesforce Mock",
+        href: "Salesforce_Mock.html",
+        icon: "SalesforceFavicon.png", // or "assets/icons/SalesforceFavicon.png"
+        desc: "Mock interface for Salesforce integration demo.",
+        tags: ["crm","salesforce","demo","mock"]
+      },
+      {
+        name: "Snowflake Mock",
+        href: "Snowflake_Mock.html",
+        icon: "SnowflakeFavicon.png", // or "assets/icons/SnowflakeFavicon.png"
+        desc: "Mock interface for Snowflake data workflows.",
+        tags: ["data","snowflake","warehouse","mock"]
       }
-      return html;
+      // Add more: { name, href, icon, desc, tags: [] }
+    ];
+
+    // ---- DOM references ----
+    const cardsEl = document.getElementById('cards');
+    const tableEl = document.getElementById('table');
+    const tbodyEl = tableEl.querySelector('tbody');
+    const searchEl = document.getElementById('search');
+    const emptyEl  = document.getElementById('empty');
+    const btnCards = document.getElementById('btnCards');
+    const btnTable = document.getElementById('btnTable');
+
+    // ---- Helpers ----
+    function esc(s) { return (s ?? '').toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function matches(q, item) {
+      if (!q) return true;
+      q = q.toLowerCase();
+      return (
+        item.name.toLowerCase().includes(q) ||
+        (item.desc || '').toLowerCase().includes(q) ||
+        (item.tags || []).join(' ').toLowerCase().includes(q) ||
+        (item.href || '').toLowerCase().includes(q)
+      );
     }
-    return `<pre class="compact">${escapeHtml(JSON.stringify(parsed, null, 2))}</pre>`;
-  }
 
-  function buildHeader(){
-    thead.innerHTML = `<tr>${COLUMN_ORDER.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`;
-  }
-  function showLoading(message='Loading…'){
-    buildHeader();
-    tbody.innerHTML = `<tr><td colspan="${COLUMN_ORDER.length}" style="padding:8px;color:var(--text-muted)">${escapeHtml(message)}</td></tr>`;
-    document.getElementById('page-range').textContent = '—';
-    rowCount.textContent = '';
-    rowsValue.textContent = '—';
-  }
+    // ---- Rendering ----
+    function renderList() {
+      const q = searchEl.value.trim().toLowerCase();
+      const filtered = interfaces.filter(it => matches(q, it));
 
-  // CSV
-  function toCsv(rows){
-    if (!rows.length) return '';
-    const head = COLUMN_ORDER.join(',');
-    const lines = rows.map(r => COLUMN_ORDER.map(h => csvVal(h === 'PREFERENCES'
-      ? (typeof r[h] === 'string' ? r[h] : JSON.stringify(r[h] ?? ''))
-      : (r[h] ?? '')
-    )).join(','));
-    return [head, ...lines].join('\n');
-  }
-  function csvVal(v){
-    const s = String(v ?? '');
-    const need = s.includes('"') || s.includes(',') || s.includes('\n');
-    return need ? `"${s.replaceAll('"','""')}"` : s;
-  }
-  function download(filename, text){
-    const blob = new Blob([text], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+      // Cards
+      cardsEl.innerHTML = filtered.map(it => `
+        <article class="card">
+          <div class="card-head">
+            <img src="${esc(it.icon)}" alt="" aria-hidden="true" />
+            <h3>${esc(it.name)}</h3>
+          </div>
+          <p>${esc(it.desc || "")}</p>
+          <div class="actions">
+            <a class="icon-button" href="${esc(it.href)}" title="Open ${esc(it.name)}">
+              <img src="${esc(it.icon)}" alt="Open ${esc(it.name)}" />
+            </a>
+            <a class="btn secondary" href="${esc(it.href)}" target="_blank" rel="noopener">New tab</a>
+          </div>
+          <div class="tags" aria-hidden="true">
+            ${(it.tags||[]).map(t => `#${esc(t)}`).join(' ')}
+          </div>
+        </article>
+      `).join('');
 
-  // ---------- Rendering ----------
-  function renderPage(){
-    const total = filtered.length;
-    const pageSize = parseInt(pageSizeSel.value, 10) || 25;
-    const pages = Math.max(1, Math.ceil(total / pageSize));
-    if (pageIndex > pages - 1) pageIndex = Math.max(0, pages - 1);
+      // Table
+      tbodyEl.innerHTML = filtered.map(it => `
+        <tr>
+          <td>
+            <a class="icon-button" href="${esc(it.href)}" title="Open ${esc(it.name)}">
+              <img src="${esc(it.icon)}" alt="Open ${esc(it.name)}" />
+            </a>
+          </td>
+          <td><strong>${esc(it.name)}</strong><div style="color:var(--muted);font-size:12px;">${esc(it.href)}</div></td>
+          <td>${esc(it.desc || "")}</td>
+          <td>${(it.tags||[]).map(esc).join(", ")}</td>
+          <td><a class="btn" href="${esc(it.href)}" target="_blank" rel="noopener">Open</a></td>
+        </tr>
+      `).join('');
 
-    const start = pageIndex * pageSize;
-    const end = Math.min(start + pageSize, total);
-    const pageRows = filtered.slice(start, end);
-
-    let html = '';
-    for (const r of pageRows) {
-      html += '<tr>';
-      for (const key of COLUMN_ORDER) {
-        switch (key) {
-          case 'CONSENT_TYPE':
-            html += `<td>${consentCell(r[key])}</td>`; break;
-          case 'PREFERENCES':
-            html += `<td>${renderPreferencesCell(r[key])}</td>`; break;
-          case 'UPDATED_AT':
-            html += `<td>${fmtDateLocal(r[key])}</td>`; break;
-          case 'ItemInternalId':
-          case 'SUBJECT_ID':
-            html += `<td class="cell-mono">${escapeHtml(r[key] ?? '')}</td>`; break;
-          default:
-            html += `<td>${escapeHtml(r[key] ?? '')}</td>`;
-        }
-      }
-      html += '</tr>';
+      emptyEl.style.display = filtered.length ? 'none' : 'block';
     }
-    tbody.innerHTML = html || `<tr><td colspan="${COLUMN_ORDER.length}" style="padding:8px;color:var(--text-muted)">No data</td></tr>`;
 
-    // Pagination controls
-    const pageRange = document.getElementById('page-range');
-    pageRange.textContent = total ? `${start + 1}–${end} of ${total}` : '0 of 0';
-    firstBtn.disabled = pageIndex === 0;
-    prevBtn.disabled  = pageIndex === 0;
-    nextBtn.disabled  = pageIndex >= pages - 1 || total === 0;
-    lastBtn.disabled  = pageIndex >= pages - 1 || total === 0;
+    // ---- View toggle ----
+    function setView(mode) {
+      const isCards = mode === 'cards';
+      cardsEl.style.display = isCards ? 'grid' : 'none';
+      tableEl.style.display = isCards ? 'none' : 'table';
+      btnCards.classList.toggle('active', isCards);
+      btnTable.classList.toggle('active', !isCards);
+    }
 
-    // Side metrics
-    rowCount.textContent = `${total} row(s)`;
-    rowsValue.textContent = total ? String(total) : '—';
-  }
+    btnCards.addEventListener('click', () => setView('cards'));
+    btnTable.addEventListener('click', () => setView('table'));
 
-  function applyFilters(){
-    const q = (filterText.value || '').trim().toLowerCase();
-    const status = (filterConsent.value || '').trim().toUpperCase();
-
-    filtered = allRows.filter(r => {
-      let ok = true;
-      if (q) {
-        const has = (k) => (String(r[k] ?? '')).toLowerCase().includes(q);
-        ok = has('SUBJECT_ID') || has('PURPOSE_NAME'); // EMAIL removed from filter
+    // ---- Search UX ----
+    searchEl.addEventListener('input', renderList);
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== searchEl) { e.preventDefault(); searchEl.focus(); }
+      if (e.key === 'Enter' && document.activeElement === searchEl) {
+        const firstLink = document.querySelector('#cards .icon-button, #table .icon-button');
+        if (firstLink) firstLink.click();
       }
-      if (ok && status) {
-        ok = String(r.CONSENT_TYPE || '').toUpperCase() === status;
-      }
-      return ok;
     });
 
-    // Default sort by UPDATED_AT desc
-    filtered.sort((a,b) => new Date(b.UPDATED_AT || 0) - new Date(a.UPDATED_AT || 0));
-
-    pageIndex = 0;
-    renderPage();
-  }
-
-  // ---------- Fetch ----------
-  async function refreshResults(){
-    try {
-      const apiUrl = (urlInput?.value || '').trim();
-      const username = (userInput?.value || '').trim();
-      if (!apiUrl) { showLoading('Please enter a valid URL Endpoint.'); return; }
-      showLoading();
-
-      try { localStorage.setItem('apiUrl', apiUrl); localStorage.setItem('username', username); } catch {}
-
-      const url = new URL(apiUrl);
-      if (username) url.searchParams.set('username', username);
-
-      const res = await fetch(url.toString(), { method:'GET', headers: { 'Accept':'application/json, text/html;q=0.9' }});
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-
-      const ct = (res.headers.get('content-type') || '').toLowerCase();
-      if (ct.includes('application/json')) {
-        const data = await res.json();
-        // Normalize: drop @odata.etag and EMAIL (EMAIL still allowed in payload; just ignored)
-        allRows = (Array.isArray(data) ? data : (Array.isArray(data?.rows) ? data.rows : []))
-          .map(r => {
-            const { ['@odata.etag']: _omit, ...rest } = r || {};
-            return rest || {};
-          });
-
-        buildHeader();
-        renderLegend();
-        applyFilters();
-      } else {
-        const html = await res.text();
-        buildHeader();
-        renderLegend();
-        tbody.innerHTML = `<tr><td colspan="${COLUMN_ORDER.length}">${sanitizeHtml(html)}</td></tr>`;
-        document.getElementById('page-range').textContent = '—';
-        rowCount.textContent = '';
-        rowsValue.textContent = '—';
-      }
-    } catch (e) {
-      buildHeader();
-      tbody.innerHTML = `<tr><td colspan="${COLUMN_ORDER.length}" style="padding:8px;color:red">Failed to load table. ${escapeHtml(e.message)}</td></tr>`;
-      document.getElementById('page-range').textContent = '—';
-      rowCount.textContent = '';
-      rowsValue.textContent = '—';
-      console.error(e);
-    }
-  }
-
-  // ---------- Events ----------
-  document.getElementById('run-query').addEventListener('click', refreshResults);
-  document.getElementById('run-global').addEventListener('click', refreshResults);
-  urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') refreshResults(); });
-
-  filterText.addEventListener('input', applyFilters);
-  filterConsent.addEventListener('change', applyFilters);
-  clearFiltersBtn.addEventListener('click', () => { filterText.value=''; filterConsent.value=''; applyFilters(); });
-
-  pageSizeSel.addEventListener('change', () => { pageIndex = 0; renderPage(); });
-  firstBtn.addEventListener('click', () => { pageIndex = 0; renderPage(); });
-  prevBtn .addEventListener('click', () => { pageIndex = Math.max(0, pageIndex - 1); renderPage(); });
-  nextBtn .addEventListener('click', () => {
-    const total = filtered.length;
-    const size = parseInt(pageSizeSel.value, 10) || 25;
-    const pages = Math.max(1, Math.ceil(total / size));
-    pageIndex = Math.min(pages - 1, pageIndex + 1);
-    renderPage();
-  });
-  lastBtn .addEventListener('click', () => {
-    const total = filtered.length;
-    const size = parseInt(pageSizeSel.value, 10) || 25;
-    const pages = Math.max(1, Math.ceil(total / size));
-    pageIndex = pages - 1; renderPage();
-  });
-
-  exportBtn.addEventListener('click', () => {
-    const csv = toCsv(filtered);
-    if (!csv) return;
-    const ts = new Date().toISOString().replace(/[:.]/g,'-');
-    download(`snowfake-results-${ts}.csv`, csv);
-  });
-
-  // Initial load
-  refreshResults();
-});
-</script>
+    // Initial render
+    renderList();
+    setView('cards');
+  </script>
 </body>
 </html>
