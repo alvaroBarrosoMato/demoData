@@ -1,0 +1,541 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" type="image/x-icon" href="SalesforceFavicon.png">
+<title>Salesforce CRM — Contacts</title>
+
+<style>
+/* --------------------------------------------------
+   Base + Variables (Salesforce-like look & feel)
+--------------------------------------------------- */
+:root{
+  --bg: #f3f2f2;
+  --border: #d9d9d9;
+  --border-2: #e5e5e5;
+  --text: #1f1f1f;
+  --muted: #5f6a7d;
+  --brand: #0176d3;           /* Salesforce brand blue */
+  --brand-600:#0b5cab;
+  --ink:#032d60;              /* Salesforce ink color */
+  --tab-bg:#ffffff;
+  --tab-hover:#f7f9fb;
+  --header-bg:#ffffff;
+  --card-bg:#ffffff;
+  --pill-bg:#eef4ff;
+  --success:#2e844a;
+  --error:#ba0517;
+  --warn:#fe9339;
+  --table-header:#f3f3f3;
+  --radius:8px;
+  --radius-sm:6px;
+  --shadow:0 1px 2px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+
+.app-shell{max-width:1600px; margin:0 auto}
+
+/* --------------------------------------------------
+   Context Bar (with SF logo + centered search)
+--------------------------------------------------- */
+.context-bar{
+  display:grid; grid-template-columns: 1fr auto 1fr;
+  align-items:center; background:var(--tab-bg);
+  border-bottom:1px solid var(--border); height:64px; padding:0 12px;
+}
+.left-chunk{display:flex; align-items:center; gap:12px}
+.sf-logo{height:28px; width:auto; display:block}
+.app-name{color:var(--ink); font-weight:700; white-space:nowrap; font-size:15px}
+
+.center-chunk{display:flex; justify-content:center; align-items:center}
+.searchbar{
+  display:flex; align-items:center; gap:8px; width:min(560px, 60vw);
+  border:1px solid #c9c9c9; border-radius:6px; padding:6px 10px; background:#fff;
+}
+.searchbar input{
+  border:none; outline:none; width:100%; font-size:14px; color:#1f1f1f; background:transparent;
+}
+
+.right-chunk{display:flex; align-items:center; justify-content:flex-end; gap:12px}
+.util-avatar{
+  width:28px; height:28px; border-radius:50%; display:grid; place-items:center;
+  background:#cfd3d9; color:#244; font-weight:700; font-size:12px;
+}
+
+/* --------------------------------------------------
+   Tabs bar (branding; Purposes active; new Contacts tab)
+--------------------------------------------------- */
+.tabs-bar{
+  background:#fff; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:6px; overflow:auto; scrollbar-width:none; padding:0 8px;
+}
+.tabs-bar::-webkit-scrollbar{display:none}
+.tab{
+  position:relative; color:var(--ink); font-size:14px; padding:12px 12px; border-radius:6px; text-decoration:none;
+}
+.tab:hover{background:var(--tab-hover)}
+.tab.active{color:var(--brand); font-weight:700; background:#eaf2fe}
+.tab.active::after{
+  content:""; position:absolute; left:10px; right:10px; bottom:-1px;
+  border-bottom:3px solid var(--brand); border-radius:2px;
+}
+
+/* --------------------------------------------------
+   Object Header (renamed to Purposes to match tab)
+--------------------------------------------------- */
+.page-header{
+  background:var(--header-bg); border-bottom:1px solid var(--border); padding:18px 16px;
+}
+.header-row{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.obj{display:flex; gap:12px; align-items:center}
+.obj-icon{
+  width:36px; height:36px; border-radius:8px; background:#6f2edc; color:#fff;
+  display:grid; place-items:center; font-weight:800; font-size:18px; box-shadow:var(--shadow);
+}
+.obj-title{font-size:22px; font-weight:700; color:var(--ink)}
+.meta{margin-top:2px; color:var(--muted); font-size:13px}
+.badge-soft{
+  display:inline-block; padding:3px 8px; border-radius:999px;
+  background:#f5f7fb; color:var(--ink); font-weight:600; font-size:12px;
+  border:1px solid var(--border);
+}
+
+.actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.btn{
+  appearance:none; border:none; cursor:pointer; border-radius:6px; font-size:14px; padding:7px 14px;
+  transition:.15s ease-in-out; display:inline-flex; align-items:center; gap:8px;
+}
+.btn:focus{outline:none; box-shadow:0 0 0 3px rgba(1,118,211,.25)}
+.btn-brand{background:var(--brand); color:#fff}
+.btn-brand:hover{background:var(--brand-600)}
+.btn-neutral{background:#fff; border:1px solid #c9c9c9; color:#18263a}
+.btn-neutral:hover{background:#f6f8fa}
+.icon-btn{
+  width:34px; height:34px; display:grid; place-items:center; background:#fff; border:1px solid #c9c9c9; border-radius:6px;
+}
+.icon-btn:hover{background:#f6f8fa}
+
+/* --------------------------------------------------
+   Sub search (list filter)
+--------------------------------------------------- */
+.page-sub{margin-top:10px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.label{font-size:13px; color:var(--muted)}
+.input{
+  border:1px solid #c9c9c9; border-radius:6px; padding:7px 10px; font-size:14px;
+}
+
+/* --------------------------------------------------
+   Card + Table
+--------------------------------------------------- */
+.container{padding:12px}
+.card{
+  background:var(--card-bg); border:1px solid var(--border); border-radius:8px; box-shadow:var(--shadow);
+}
+.loading{display:flex; align-items:center; gap:10px; padding:16px; color:var(--muted)}
+.spinner{
+  width:22px;height:22px;border-radius:50%;border:3px solid #d7e6fb;border-top-color:var(--brand);animation:spin 1s linear infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.table-wrap{width:100%; overflow:auto}
+table{width:100%; border-collapse:collapse}
+thead{background:var(--table-header)}
+th,td{padding:10px 14px; font-size:14px; text-align:left; white-space:nowrap; border-bottom:1px solid var(--border-2)}
+tr:hover{background:#fafafa}
+th{font-size:12.5px; color:#4a4a4a}
+.th-sort{display:inline-flex; align-items:center; gap:6px}
+.sort-arrow{width:6px; height:6px; border-right:2px solid #999; border-bottom:2px solid #999; transform:rotate(45deg)}
+.link{color:var(--brand); text-decoration:none}
+.link:hover{text-decoration:underline}
+
+/* Badges (consent) */
+.badge{
+  display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; color:#fff
+}
+.badge.success{background:var(--success)}
+.badge.error{background:var(--error)}
+.badge.warn{background:var(--warn)}
+.badge.neutral{background:#9aa5b1}
+
+/* Preferences pill group */
+.pills{display:flex; flex-wrap:wrap; gap:6px}
+.pill{
+  display:inline-block; padding:4px 10px; border-radius:999px; background:var(--pill-bg); color:var(--ink); font-weight:600; font-size:12px; border:1px solid #d6e2ff
+}
+
+/* Pagination */
+.pager{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:10px 14px; color:var(--muted);
+  border-top:1px solid var(--border-2);
+}
+.pager-left{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.pager-right{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.page-btn{
+  min-width:32px; height:32px; padding:0 8px; border:1px solid #c9c9c9; background:#fff;
+  border-radius:6px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px;
+}
+.page-btn:hover{background:#f6f8fa}
+.page-btn[disabled]{opacity:.5; cursor:not-allowed}
+.page-btn.active{background:#eaf2fe; border-color:#a7c7f7; color:var(--brand); font-weight:700}
+
+/* Utility icon (inline SVG) */
+.icon{width:16px; height:16px; display:inline-block; vertical-align:middle; fill:currentColor}
+
+/* Responsive tweaks */
+@media (max-width:900px){ .searchbar{width:min(440px, 70vw)} }
+@media (max-width:600px){
+  .searchbar{width:100%}
+  .actions{width:100%}
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Context bar -->
+  <div class="context-bar">
+    <div class="left-chunk">
+      <img class="sf-logo" alt="Salesforce" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Salesforce.com_logo.svg/1280px-Salesforce.com_logo.svg.png">
+      <div class="app-name" title="Salesforce CRM">Salesforce CRM</div>
+    </div>
+
+    <div class="center-chunk">
+      <div class="searchbar" role="search">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.471 6.471 0 10-.71.71l.27.28v.79L20 21.5 21.5 20l-6-6zM6.5 11a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z"/></svg>
+        <input type="text" placeholder="Search..." aria-label="Global search">
+      </div>
+    </div>
+
+    <div class="right-chunk">
+      <div class="util-avatar" title="User">AB</div>
+    </div>
+  </div>
+
+  <!-- Tabs (Purposes active; add Contacts; removed Chatter/Files/RFX/SOWs/OneTrust Events earlier) -->
+  <nav class="tabs-bar" aria-label="Primary">
+    <a class="tab" href="javascript:void(0)">Home</a>
+    <a class="tab" href="javascript:void(0)">Campaigns</a>
+    <a class="tab" href="javascript:void(0)">Leads</a>
+    <a class="tab active" href="javascript:void(0)">Purposes</a>   <!-- renamed current + active -->
+    <a class="tab" href="javascript:void(0)">Accounts</a>
+    <a class="tab" href="javascript:void(0)">Opportunities</a>
+    <a class="tab" href="javascript:void(0)">Reports</a>
+    <a class="tab" href="javascript:void(0)">Dashboards</a>
+    <a class="tab" href="javascript:void(0)">Contacts</a>          <!-- new tab -->
+    <a class="tab" href="javascript:void(0)">OneTrust Ideas</a>
+    <a class="tab" href="javascript:void(0)">Email Templates</a>
+    <a class="tab" href="javascript:void(0)">Email Service Logs</a>
+  </nav>
+
+  <!-- Object header (aligned to Purposes) -->
+  <header class="page-header">
+    <div class="header-row">
+      <div class="obj">
+        <div class="obj-icon" aria-hidden="true">P</div>
+        <div>
+          <div class="obj-title">Purposes</div>
+          <div class="meta">
+            <span>List View:</span>
+            <span class="badge-soft">All Purposes</span>
+            <span> • 100+ items • Sorted by Id • Updated 10 minutes ago</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-brand">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/></svg>
+          New
+        </button>
+        <button class="btn btn-neutral">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v5h4v4h12v-4h4v-5c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 .99.45.99 1-.44 1-.99 1zM18 3H6v4h12V3z"/></svg>
+          Printable View
+        </button>
+        <button class="icon-btn" title="List Settings">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19.14,12.94a7.43,7.43,0,0,0,.05-1,7.43,7.43,0,0,0-.05-1l2-1.55a.5.5,0,0,0,.12-.65l-1.9-3.28a.5.5,0,0,0-.6-.22l-2.35,1a7.28,7.28,0,0,0-1.73-1l-.36-2.49A.5.5,0,0,0,12,1h-4a.5.5,0,0,0-.49.41L7.18,3.9a7.28,7.28,0,0,0-1.73,1l-2.35-1a.5.5,0,0,0-.6.22L.6,7.44a.5.5,0,0,0,.12.65l2,1.55a7.43,7.43,0,0,0-.05,1,7.43,7.43,0,0,0,.05,1L.72,13.74a.5.5,0,0,0-.12.65l1.9,3.28a.5.5,0,0,0,.6.22l2.35-1a7.28,7.28,0,0,0,1.73,1l.36,2.49A.5.5,0,0,0,8,23h4a.5.5,0,0,0,.49-.41l.36-2.49a7.28,7.28,0,0,0,1.73-1l2.35,1a.5.5,0,0,0,.6-.22l1.9-3.28a.5.5,0,0,0-.12-.65ZM10,15a3,3,0,1,1,3-3A3,3,0,0,1,10,15Z"/></svg>
+        </button>
+        <button class="icon-btn" title="Refresh" id="btnRefresh">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1L7 6l5 5V7c2.76 0 5 2.24 5 5a5 5 0 0 1-8.66 3.54l-1.42 1.42A7 7 0 1 0 19 12c0-1.93-.78-3.68-2.05-4.95z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- list meta / local filter -->
+    <div class="page-sub">
+      <span class="label">Search this list</span>
+      <input id="searchList" class="input" placeholder="Type to filter rows...">
+    </div>
+  </header>
+
+  <!-- Card + Table -->
+  <div class="container">
+    <div class="card">
+      <div id="loading" class="loading">
+        <div class="spinner" aria-hidden="true"></div>
+        <span>Loading purposes...</span>
+      </div>
+
+      <div class="table-wrap">
+        <table id="contactTable" role="grid" aria-label="Purposes" style="display:none;">
+          <thead>
+            <tr>
+              <th scope="col"><span class="th-sort">Id <span class="sort-arrow"></span></span></th>
+              <th scope="col">Email</th>
+              <th scope="col">PURPOSE NAME</th>
+              <th scope="col">CONSENT TYPE</th>
+              <th scope="col">PREFERENCES</th>
+              <th scope="col">&amp; UPDATED AT</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div id="pager" class="pager" style="display:none;">
+        <div class="pager-left">
+          <span id="rangeText">Showing 0–0 of 0</span>
+          <label class="label" for="rowsPerPage">Rows per page</label>
+          <select id="rowsPerPage" class="input" style="width:auto; padding:6px 8px;">
+            <option>25</option>
+            <option selected>50</option>
+            <option>100</option>
+          </select>
+        </div>
+        <div class="pager-right" id="pageButtons"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.app-shell -->
+
+<script>
+// ------------------------------------------------------
+//  POWER AUTOMATE ENDPOINT (your URL)
+// ------------------------------------------------------
+const API_URL =
+  "https://default9d1d17d8372b4b23a9fc1e5d895c89.a1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a3eaffa116ac4c0cb3d7d5dc86724a8f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5X3nvYDfsc1yBZYsz6SEYNA5ZfmZf4wODLLXHMyaO4";
+
+// ------------------------------------------------------
+//  State
+// ------------------------------------------------------
+let allData = [];       // full dataset from API
+let filteredData = [];  // after search filter
+let currentPage = 1;
+let pageSize = 50;
+
+// ------------------------------------------------------
+//  Helpers
+// ------------------------------------------------------
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
+function aLink(text){
+  const t = esc(text);
+  return '<a href="javascript:void(0)" class="link">'+t+'</a>';
+}
+function consentBadge(type){
+  const t=(type||"").toUpperCase();
+  if(t==="ACTIVE")  return '<span class="badge success">ACTIVE</span>';
+  if(t==="REVOKED") return '<span class="badge error">REVOKED</span>';
+  if(t==="PENDING") return '<span class="badge warn">PENDING</span>';
+  if(t==="")        return '<span class="badge neutral">—</span>';
+  return '<span class="badge neutral">'+esc(t)+'</span>';
+}
+// Parse PREFERENCES from API (stringified JSON of categories/options)
+function parsePreferences(prefStr){
+  if(!prefStr) return [];
+  try{
+    const parsed = JSON.parse(prefStr); // expected: [{ name, options:[{name, value:"true"/"false"}] }]
+    if(!Array.isArray(parsed)) return [];
+    const pills = [];
+    parsed.forEach(cat=>{
+      const catName = cat?.name ?? "";
+      (cat?.options ?? []).forEach(opt=>{
+        const val = String(opt?.value ?? "").toLowerCase();
+        if(val === "true"){
+          const label = (catName ? (catName + ": ") : "") + (opt?.name ?? "");
+          if(label.trim()) pills.push(label);
+        }
+      });
+    });
+    return pills;
+  }catch(e){
+    // fallback: treat as CSV if not JSON
+    return String(prefStr).split(",").map(s=>s.trim()).filter(Boolean);
+  }
+}
+function prefPills(pills){
+  if(!pills || pills.length===0) return "—";
+  return '<div class="pills">' + pills.map(p=>'<span class="pill">'+esc(p)+'</span>').join('') + '</div>';
+}
+function fmtDate(iso){
+  if(!iso) return "";
+  try{
+    const loc = navigator.language || "en-GB";
+    return new Date(iso).toLocaleString(loc, {
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", hour12:false
+    });
+  }catch(e){ return new Date(iso).toLocaleString(); }
+}
+
+// ------------------------------------------------------
+//  Rendering
+// ------------------------------------------------------
+function renderTablePage(){
+  const tbody = document.getElementById("tableBody");
+  const table = document.getElementById("contactTable");
+  const pager = document.getElementById("pager");
+  const rangeText = document.getElementById("rangeText");
+
+  const total = filteredData.length;
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  currentPage = Math.min(Math.max(1, currentPage), pageCount);
+
+  const startIndex = (currentPage - 1) * pageSize;         // inclusive
+  const endIndex = Math.min(startIndex + pageSize, total); // exclusive
+  const pageSlice = filteredData.slice(startIndex, endIndex);
+
+  tbody.innerHTML = "";
+  pageSlice.forEach(item=>{
+    const id = item.ItemInternalId || item.ID || item.Id || item.id || "";
+    const email = item.EMAIL || item.SUBJECT_ID || ""; // SUBJECT_ID carries email in sample
+    const purpose = item.PURPOSE_NAME || "";
+    const consent = item.CONSENT_TYPE || "";
+    const prefs = parsePreferences(item.PREFERENCES || "[]");
+    const updatedAt = fmtDate(item.UPDATED_AT);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${aLink(id)}</td>
+      <td>${aLink(email)}</td>
+      <td>${aLink(purpose)}</td>
+      <td>${consentBadge(consent)}</td>
+      <td>${prefPills(prefs)}</td>
+      <td>${esc(updatedAt) || "—"}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Range + visibility
+  table.style.display = total ? "table" : "none";
+  pager.style.display = total ? "flex" : "none";
+  rangeText.textContent = total ? `Showing ${total ? (startIndex+1) : 0}–${endIndex} of ${total}` : "No results";
+
+  renderPageButtons(pageCount);
+}
+
+function renderPageButtons(pageCount){
+  const wrap = document.getElementById("pageButtons");
+  wrap.innerHTML = "";
+
+  // Previous
+  const prev = document.createElement("button");
+  prev.className = "page-btn";
+  prev.textContent = "‹";
+  prev.disabled = currentPage === 1;
+  prev.onclick = () => { currentPage--; renderTablePage(); };
+  wrap.appendChild(prev);
+
+  // Page numbers (compact: show first, last, and neighbors)
+  const pages = [];
+  const add = p => { if(!pages.includes(p) && p>=1 && p<=pageCount) pages.push(p); };
+  add(1); add(pageCount);
+  add(currentPage-2); add(currentPage-1); add(currentPage); add(currentPage+1); add(currentPage+2);
+  pages.sort((a,b)=>a-b);
+
+  let last = 0;
+  pages.forEach(p=>{
+    if(p - last > 1){
+      const dots = document.createElement("span");
+      dots.textContent = "…";
+      dots.style.margin = "0 4px";
+      wrap.appendChild(dots);
+    }
+    const btn = document.createElement("button");
+    btn.className = "page-btn" + (p===currentPage ? " active" : "");
+    btn.textContent = String(p);
+    btn.onclick = () => { currentPage = p; renderTablePage(); };
+    wrap.appendChild(btn);
+    last = p;
+  });
+
+  // Next
+  const next = document.createElement("button");
+  next.className = "page-btn";
+  next.textContent = "›";
+  next.disabled = currentPage === pageCount;
+  next.onclick = () => { currentPage++; renderTablePage(); };
+  wrap.appendChild(next);
+}
+
+// ------------------------------------------------------
+//  Data load + interactions
+// ------------------------------------------------------
+async function loadPurposes(){
+  const loading = document.getElementById("loading");
+  const table = document.getElementById("contactTable");
+
+  try{
+    const res = await fetch(API_URL, { method: "GET" });
+    if(!res.ok) throw new Error("Network response was not ok: " + res.status);
+    const data = await res.json();
+    if(!Array.isArray(data)) throw new Error("Unexpected payload format (expected an array).");
+
+    allData = data;
+    filteredData = allData.slice();  // initial
+    loading.style.display = "none";
+    table.style.display = "table";
+    renderTablePage();
+  }catch(err){
+    console.error(err);
+    loading.innerHTML = '<span style="color:#ba0517">Error loading purposes. Check CORS/network or the Flow response.</span>';
+  }
+}
+
+document.getElementById("searchList").addEventListener("input", function(){
+  const q = this.value.toLowerCase().trim();
+  filteredData = allData.filter(item=>{
+    const id = (item.ItemInternalId || item.ID || item.Id || item.id || "") + "";
+    const email = (item.EMAIL || item.SUBJECT_ID || "") + "";
+    const purpose = (item.PURPOSE_NAME || "") + "";
+    const consent = (item.CONSENT_TYPE || "") + "";
+    const prefsRaw = item.PREFERENCES || "[]";
+    const prefs = parsePreferences(prefsRaw).join(" ");
+    const updatedAt = (item.UPDATED_AT || "") + "";
+    const hay = `${id} ${email} ${purpose} ${consent} ${prefs} ${updatedAt}`.toLowerCase();
+    return hay.includes(q);
+  });
+  currentPage = 1;
+  renderTablePage();
+});
+
+document.getElementById("rowsPerPage").addEventListener("change", function(){
+  pageSize = parseInt(this.value, 10) || 50;
+  currentPage = 1;
+  renderTablePage();
+});
+
+document.getElementById("btnRefresh").addEventListener("click", () => {
+  // Re-fetch to keep in sync with server
+  const loading = document.getElementById("loading");
+  document.getElementById("contactTable").style.display = "none";
+  document.getElementById("pager").style.display = "none";
+  loading.style.display = "flex";
+  loadPurposes();
+});
+
+// Kickoff
+loadPurposes();
+</script>
+</body>
+</html>
