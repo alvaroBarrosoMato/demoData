@@ -4,11 +4,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Demo Interfaces – Index</title>
-  <meta name="description" content="Select an interface to open its demo page." />
-
-  <!-- Fallback favicon (optional) -->
-  <link rel="icon" href="ot_favicon.png"/>
+  <title>UCPM Integration Simulator</title>
+  <meta name="description" content="Showcase Onetrust UCPM integrations in resilient simulated environments for CRMs, data lakes, and more." />
 
   <style>
     :root{
@@ -18,7 +15,6 @@
       --muted: #a7b1c2;
       --border: #1e222b;
       --brand: #2e7cf6;
-      --brand-2: #00c2ff;
       --shadow: 0 6px 30px rgba(0,0,0,.35);
       color-scheme: light dark;
     }
@@ -32,152 +28,106 @@
         --shadow: 0 8px 28px rgba(16,24,40,.08);
       }
     }
+
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
       margin: 0;
       font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background: radial-gradient(1200px 600px at 10% -10%, rgba(46,124,246,.12), transparent 60%),
-                  radial-gradient(1200px 600px at 110% 10%, rgba(0,194,255,.10), transparent 60%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(46,124,246,.12), transparent 60%),
+        radial-gradient(1200px 600px at 110% 10%, rgba(0,194,255,.10), transparent 60%),
+        var(--bg);
       color: var(--text);
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
-    header {
-      padding: 40px 24px 16px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .title {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .title h1 {
-      margin: 0;
-      font-size: clamp(24px, 3vw, 36px);
-      letter-spacing: .2px;
-      font-weight: 700;
-    }
-    .title .badge {
-      font-size: 12px;
-      padding: 4px 8px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      color: var(--muted);
-      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.03));
-    }
-    .subtitle {
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      max-width: 70ch;
-    }
+    header { padding: 40px 24px 16px; max-width: 1100px; margin: 0 auto; }
+    .title { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .title h1 { margin: 0; font-size: clamp(24px, 3vw, 36px); font-weight: 700; }
+    /* .badge removed per request */
+    .subtitle { margin: 10px 0 0; color: var(--muted); font-size: 14px; max-width: 80ch; }
 
-    .toolbar {
-      display: flex; gap: 12px; align-items: center; margin-top: 18px;
-      flex-wrap: wrap;
-    }
-    .search {
-      position: relative; flex: 1 1 320px; min-width: 240px;
-    }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+    .search { position: relative; flex: 1 1 320px; min-width: 240px; }
     .search input {
-      width: 100%;
-      padding: 12px 14px 12px 40px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      outline: none;
-      box-shadow: var(--shadow);
+      width: 100%; padding: 12px 14px 12px 40px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--card); color: var(--text);
+      outline: none; box-shadow: var(--shadow);
     }
-    .search svg {
-      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-      opacity: .6;
-    }
-    .view-btns {
-      display: flex; gap: 8px;
-    }
+    .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .6; }
+    .view-btns { display: flex; gap: 8px; }
     .view-btns button {
-      background: var(--card); color: var(--muted);
-      border: 1px solid var(--border); padding: 10px 12px; border-radius: 10px; cursor: pointer;
+      background: transparent; color: var(--muted); border: 1px solid var(--border);
+      padding: 10px 12px; border-radius: 10px; cursor: pointer;
     }
     .view-btns button.active { color: var(--text); border-color: #2b3342; }
 
-    main {
-      max-width: 1100px; margin: 0 auto; padding: 10px 24px 60px;
-    }
+    main { max-width: 1100px; margin: 0 auto; padding: 10px 24px 60px; }
 
-    /* Grid for cards */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px;
-      margin-top: 24px;
-    }
+    /* Grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
 
     .card {
       display: flex; flex-direction: column; gap: 12px;
       background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.04)), var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px; padding: 16px; box-shadow: var(--shadow);
+      border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow);
       transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
     }
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: #2c3444;
-      box-shadow: 0 10px 36px rgba(0,0,0,.45);
-    }
+    .card:hover { transform: translateY(-2px); border-color: #2c3444; box-shadow: 0 10px 36px rgba(0,0,0,.45); }
     .card-head { display: flex; align-items: center; gap: 12px; }
-    .card-head img {
-      width: 28px; height: 28px; border-radius: 6px; object-fit: contain; background: #fff;
-      border: 1px solid var(--border);
-    }
+    .card-head img { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; background: #fff; border: 1px solid var(--border); }
     .card h3 { margin: 0; font-size: 16px; }
     .card p { margin: 0; color: var(--muted); font-size: 13px; min-height: 36px; }
-    .card .actions { display: flex; gap: 10px; margin-top: 6px; }
-    .card a {
-      text-decoration: none; font-size: 13px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border);
-      color: var(--text); background: #1a1f2b; display: inline-flex; align-items: center; gap: 8px;
-    }
-    .card a:hover { border-color: #3a4356; }
-    .card a.secondary { background: transparent; color: var(--muted); }
-    .meta {
-      margin-top: 20px; color: var(--muted); font-size: 12px; text-align: center;
-    }
-    footer {
-      border-top: 1px dashed var(--border);
-      max-width: 1100px; margin: 0 auto; padding: 14px 24px 40px; color: var(--muted);
-      font-size: 12px;
-    }
 
-    /* Table view (toggle) */
+    /* Actions – text buttons, no black backgrounds */
+    .actions { display: flex; gap: 10px; align-items: center; margin-top: 6px; }
+    .btn {
+      text-decoration: none; font-size: 13px; padding: 8px 10px; border-radius: 10px;
+      border: 1px solid var(--border); color: var(--text); background: transparent;
+      display: inline-flex; align-items: center; gap: 8px; transition: background-color .12s ease, border-color .12s ease, transform .12s ease;
+    }
+    .btn:hover { border-color: #3a4356; background-color: rgba(255,255,255,.06); transform: translateY(-1px); }
+    .btn.secondary { color: var(--muted); }
+    .tags { color: var(--muted); font-size: 12px; }
+
+    .meta { margin-top: 20px; color: var(--muted); font-size: 12px; text-align: center; }
+    footer { border-top: 1px dashed var(--border); max-width: 1100px; margin: 0 auto; padding: 14px 24px 40px; color: var(--muted); font-size: 12px; }
+
+    /* Table view */
     .table { width: 100%; border-collapse: collapse; display: none; margin-top: 24px; }
-    .table th, .table td { border-bottom: 1px solid var(--border); padding: 10px 8px; text-align: left; }
+    .table th, .table td { border-bottom: 1px solid var(--border); padding: 10px 8px; text-align: left; vertical-align: middle; }
     .table th { color: var(--muted); font-weight: 600; }
-    .table a { color: var(--brand); text-decoration: none; }
-    .table .open { padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: #1a1f2b; }
+    .table .open { padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: transparent; }
+    .table .open:hover { border-color: #3a4356; background-color: rgba(255,255,255,.06); }
 
-    /* Accessibility helpers */
+    /* Accessibility & kbd (no black background) */
     :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
+    kbd {
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 2px 6px; border-radius: 6px;
+      font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="title">
-      <h1>Demo Interfaces</h1>
-      <span class="badge">Index</span>
+      <h1>UCPM Integration Simulator</h1>
+      <!-- index badge removed -->
     </div>
     <p class="subtitle">
-      Select an interface to open its HTML mock. Use the search to quickly filter by name or tags.
+      Use this simulator to showcase integrations for your Onetrust UCPM projects and trials in safe, resilient, and
+      <strong>unbreakable</strong> activation environments—mirroring CRMs, data lakes, and other platforms—so you can
+      validate and demonstrate end‑to‑end flows without risking production systems.
     </p>
 
     <div class="toolbar" role="region" aria-label="Toolbar">
       <div class="search">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M21 21l-4.2-4.2M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M21 21l-4.2-4.2M10.5 18a 7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         </svg>
         <input id="search" type="search" placeholder="Search interfaces… (e.g., snowflake, salesforce)" aria-label="Search interfaces" />
       </div>
@@ -196,11 +146,11 @@
     <table id="table" class="table" aria-live="polite">
       <thead>
         <tr>
-          <th style="width:34px;"></th>
+          <th style="width:120px;">Open</th>
           <th>Name</th>
           <th>Description</th>
           <th>Tags</th>
-          <th style="width:120px;">Open</th>
+          <th style="width:120px;">New tab</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -211,33 +161,32 @@
 
   <footer>
     <div class="meta">
-      Tip: Press <kbd>/</kbd> to focus search. Use <kbd>Enter</kbd> to open the first result.
+      Tip: Press <kbd>/</kbd> to focus search. Use <kbd>Enter</kbd> to open the first result.<br />
+      Project designed, developed, built and marketed by <strong>Alvaro Barroso Mato</strong> —
+      <a href="mailto:alvaro.barrosomato@onetrust.com" style="color:inherit;">alvaro.barrosomato@onetrust.com</a>
     </div>
   </footer>
 
   <script>
     // ---- Configuration: list your interfaces here ----
-    // Update paths to your icons if you keep them in the repo root.
     const interfaces = [
       {
         name: "Salesforce Mock",
         href: "Salesforce_Mock.html",
-        icon: "assets/icons/SalesforceFavicon.png", // or "SalesforceFavicon.png"
+        icon: "SalesforceFavicon.png",
         desc: "Mock interface for Salesforce integration demo.",
         tags: ["crm","salesforce","demo","mock"]
       },
       {
         name: "Snowflake Mock",
         href: "Snowflake_Mock.html",
-        icon: "assets/icons/SnowflakeFavicon.png", // or "SnowflakeFavicon.png"
+        icon: "SnowflakeFavicon.png",
         desc: "Mock interface for Snowflake data workflows.",
         tags: ["data","snowflake","warehouse","mock"]
       }
-      // Add new entries here as you create new *.html mocks.
-      // { name: "My New Mock", href: "MyMock.html", icon: "assets/icons/MyIcon.png", desc: "Short description", tags: ["tag1","tag2"] }
+      // Add more entries as needed
     ];
 
-    // ---- Rendering ----
     const cardsEl = document.getElementById('cards');
     const tableEl = document.getElementById('table');
     const tbodyEl = tableEl.querySelector('tbody');
@@ -245,6 +194,8 @@
     const emptyEl  = document.getElementById('empty');
     const btnCards = document.getElementById('btnCards');
     const btnTable = document.getElementById('btnTable');
+
+    const esc = s => (s ?? '').toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
     function matches(q, item) {
       if (!q) return true;
@@ -260,39 +211,39 @@
     function renderList() {
       const q = searchEl.value.trim().toLowerCase();
       const filtered = interfaces.filter(it => matches(q, it));
-      // cards
+
+      // Cards
       cardsEl.innerHTML = filtered.map(it => `
         <article class="card">
           <div class="card-head">
-            <img src="${it.icon}" alt="" onerror="this.style.visibility='hidden'" />
-            <h3>${it.name}</h3>
+            <img src="${esc(it.icon)}" alt="" />
+            <h3>${esc(it.name)}</h3>
           </div>
-          <p>${it.desc || ""}</p>
+          <p>${esc(it.desc || "")}</p>
           <div class="actions">
-            <a class="primary" href="${it.href}">Open</a>
-            <a class="secondary" href="${it.href}" target="_blank" rel="noopener">New tab</a>
+            <a class="btn" href="${esc(it.href)}">Open here</a>
+            <a class="btn secondary" href="${esc(it.href)}" target="_blank" rel="noopener">New tab</a>
           </div>
-          <div class="tags" aria-hidden="true" style="color:var(--muted); font-size:12px;">
-            ${ (it.tags||[]).map(t => `#${t}`).join(' ') }
+          <div class="tags" aria-hidden="true">
+            ${(it.tags||[]).map(t => `#${esc(t)}`).join(' ')}
           </div>
         </article>
       `).join('');
 
-      // table
+      // Table
       tbodyEl.innerHTML = filtered.map(it => `
         <tr>
-          <td><img src="${it.icon}" alt="" style="width:20px;height:20px;border-radius:4px;object-fit:contain;background:#fff;border:1px solid var(--border);" onerror="this.style.visibility='hidden'"></td>
-          <td><strong>${it.name}</strong><div style="color:var(--muted);font-size:12px;">${it.href}</div></td>
-          <td>${it.desc || ""}</td>
-          <td>${(it.tags||[]).join(", ")}</td>
-          <td><a class="open" href="${it.href}">Open</a></td>
+          <td><a class="open" href="${esc(it.href)}">Open here</a></td>
+          <td><strong>${esc(it.name)}</strong><div style="color:var(--muted);font-size:12px;">${esc(it.href)}</div></td>
+          <td>${esc(it.desc || "")}</td>
+          <td>${(it.tags||[]).map(esc).join(", ")}</td>
+          <td><a class="open" href="${esc(it.href)}" target="_blank" rel="noopener">New tab</a></td>
         </tr>
       `).join('');
 
       emptyEl.style.display = filtered.length ? 'none' : 'block';
     }
 
-    // ---- View toggle ----
     function setView(mode) {
       const isCards = mode === 'cards';
       cardsEl.style.display = isCards ? 'grid' : 'none';
@@ -304,20 +255,15 @@
     btnCards.addEventListener('click', () => setView('cards'));
     btnTable.addEventListener('click', () => setView('table'));
 
-    // ---- Search UX ----
     searchEl.addEventListener('input', renderList);
     window.addEventListener('keydown', (e) => {
-      if (e.key === '/' && document.activeElement !== searchEl) {
-        e.preventDefault(); searchEl.focus();
-      }
+      if (e.key === '/' && document.activeElement !== searchEl) { e.preventDefault(); searchEl.focus(); }
       if (e.key === 'Enter' && document.activeElement === searchEl) {
-        // Open first visible result
-        const firstLink = document.querySelector('#cards a, #table a');
+        const firstLink = document.querySelector('#cards a.btn, #table a.open');
         if (firstLink) firstLink.click();
       }
     });
 
-    // Initial render
     renderList();
     setView('cards');
   </script>
