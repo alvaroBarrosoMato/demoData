@@ -26,9 +26,6 @@
 
       --chip-bg:#f5f7fb;
       --chip-border:#dce3f2;
-      --ok:#1ea672;
-      --warn:#b04c00;
-
       --shadow:0 1px 2px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.06);
       --radius:8px;
       --focus:0 0 0 3px rgba(20,115,230,.25);
@@ -39,7 +36,7 @@
       color:var(--aep-gray-900); background:#fafafa;
     }
 
-    /* ===== WHITE TOP BAR (centered search) ===== */
+    /* ===== WHITE TOP BAR ===== */
     .topbar{
       height:56px; background:#fff; color:var(--aep-brand);
       display:grid; grid-template-columns: 280px 1fr 280px; align-items:center;
@@ -71,7 +68,7 @@
     }
 
     /* ===== APP SHELL ===== */
-    .shell{display:grid; grid-template-columns: 232px 1fr; min-height: calc(100% - 94px);} /* 56 + 38 */
+    .shell{display:grid; grid-template-columns: 232px 1fr; min-height: calc(100% - 94px);}
     .rail{ background:#fff; border-right:1px solid var(--aep-gray-200); padding:12px 8px; overflow:auto; }
     .group{ margin:12px 6px }
     .group h6{
@@ -92,25 +89,24 @@
     .tab.active{ color:var(--aep-blue); position:relative }
     .tab.active::after{ content:""; position:absolute; left:0; bottom:-8px; width:100%; height:2px; background:var(--aep-blue) }
 
-    /* ===== CARD & CONTROLS ===== */
+    /* ===== CARD/CONTROLS ===== */
     .card{ background:#fff; border:1px solid var(--aep-gray-200); border-radius:8px; box-shadow:var(--shadow) }
     .card .card-body{ padding:16px 16px 10px }
     .info{ display:inline-flex; align-items:center; gap:6px; color:var(--aep-gray-700); font-size:12px }
-    .info .i{ width:16px; height:16px; border-radius:50%; background:#edf3ff; color:var(--aep-blue); display:grid; place-items:center; font-weight:800 }
+    .info .i{ width:16px; height:16px; border-radius:50%; background:#edf3ff; color:#1473e6; display:grid; place-items:center; font-weight:800 }
 
     .controls{
       display:grid; gap:10px; align-items:center;
-      grid-template-columns: 320px 260px 1fr auto auto; /* merge, namespace, filter, view, clear */
+      grid-template-columns: 320px 260px 1fr auto auto;
       margin-top:8px;
     }
     .chip{
-      display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:20px; background:var(--chip-bg);
-      border:1px solid var(--chip-border); color:var(--aep-gray-800); position:relative;
+      display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:20px; background:#f5f7fb;
+      border:1px solid #dce3f2; color:#2c2c2c; position:relative;
     }
     .chip .label{ font-weight:600 }
-    .chip .value{ background:#fff; padding:4px 8px; border-radius:12px; border:1px solid var(--chip-border) }
-    .chip .x{ width:18px; height:18px; border-radius:50%; display:grid; place-items:center; cursor:pointer; color:var(--aep-gray-600) }
-    .chip .x:hover{ background:#efefef }
+    .chip .value{ background:#fff; padding:4px 8px; border-radius:12px; border:1px solid #dce3f2 }
+    .chip .x{ width:18px; height:18px; border-radius:50%; display:grid; place-items:center; cursor:pointer; color:#616161 }
     .chip.select{ cursor:pointer }
     .chip.select:hover{ box-shadow:var(--focus) }
 
@@ -119,40 +115,36 @@
       padding:6px 0; z-index:20; min-width:260px; display:none;
     }
     .menu.open{ display:block }
-    .menu a{ display:block; padding:8px 12px; text-decoration:none; color:var(--aep-gray-800); font-size:14px }
+    .menu a{ display:block; padding:8px 12px; text-decoration:none; color:#2c2c2c; font-size:14px }
     .menu a:hover{ background:#f6f8ff }
-    .menu a.active::after{ content:"✓"; float:right; color:var(--ok); font-weight:700 }
+    .menu a.active::after{ content:"✓"; float:right; color:#1ea672; font-weight:700 }
 
-    .filter{
-      display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--aep-gray-300);
-      border-radius:20px; padding:8px 12px;
-    }
+    .filter{ display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #c7c7c7; border-radius:20px; padding:8px 12px; }
     .filter:focus-within{ box-shadow:var(--focus) }
     .filter input{ border:0; outline:none; width:100%; font-size:14px }
 
     .btn{ border:0; border-radius:22px; padding:8px 16px; font-weight:700; cursor:pointer }
-    .btn.primary{ background:var(--aep-blue); color:#fff }
-    .btn.primary:hover{ background:var(--aep-blue-600) }
-    .btn.ghost{ background:transparent; color:var(--aep-gray-900) }
+    .btn.primary{ background:#1473e6; color:#fff }
+    .btn.primary:hover{ background:#0d66d0 }
+    .btn.ghost{ background:transparent; color:#1f1f1f }
     .btn.ghost:hover{ background:#f2f2f2 }
 
     .rbar{ display:flex; gap:10px; align-items:center; justify-content:flex-end; margin:8px 0 0 }
-    .toggle{ display:inline-flex; align-items:center; gap:10px; padding:8px 10px; background:#fff; border:1px solid var(--aep-gray-300); border-radius:20px }
-    .toggle input{ accent-color:var(--aep-blue) }
+    .toggle{ display:inline-flex; align-items:center; gap:10px; padding:8px 10px; background:#fff; border:1px solid #c7c7c7; border-radius:20px }
+    .toggle input{ accent-color:#1473e6 }
 
     /* ===== GRID ===== */
     .grid-wrapper{ border-top:1px solid var(--aep-gray-200); margin-top:10px }
     table{ width:100%; border-collapse:separate; border-spacing:0 }
     thead{ background:#fafbff }
     thead th{
-      font-size:12px; letter-spacing:.3px; text-transform:uppercase; color:var(--aep-gray-600);
+      font-size:12px; letter-spacing:.3px; text-transform:uppercase; color:#5c5c5c;
       text-align:left; padding:10px 12px; border-bottom:1px solid var(--aep-gray-200)
     }
     tbody tr{ background:#fff }
     tbody tr:hover{ background:#eef4ff }
     tbody td{ padding:12px; border-bottom:1px solid var(--aep-gray-200); vertical-align:top }
 
-    /* Purpose pills */
     .pills{ display:flex; flex-wrap:wrap; gap:6px }
     .pill{
       display:inline-flex; align-items:center; gap:6px;
@@ -163,9 +155,9 @@
     .pill:hover{ box-shadow:var(--focus) }
 
     .loading{ display:flex; align-items:center; gap:10px; padding:12px }
-    .spinner{ width:22px; height:22px; border:3px solid #cfd8ff; border-top-color:var(--aep-blue); border-radius:50%; animation:spin 1s linear infinite }
+    .spinner{ width:22px; height:22px; border:3px solid #cfd8ff; border-top-color:#1473e6; border-radius:50%; animation:spin 1s linear infinite }
     @keyframes spin{ to{ transform:rotate(360deg) } }
-    .empty, .error{ padding:24px; color:var(--aep-gray-700) }
+    .empty, .error{ padding:24px; color:#5c5c5c }
 
     /* ===== Drawer (Adobe card) ===== */
     .backdrop{
@@ -174,12 +166,12 @@
     .backdrop.open{ opacity:1; pointer-events:auto }
     .drawer{
       position:fixed; right:-920px; top:0; height:100%; width:min(920px, 95vw);
-      background:#fff; border-left:4px solid var(--aep-blue); box-shadow: -12px 0 28px rgba(0,0,0,.18);
+      background:#fff; border-left:4px solid #1473e6; box-shadow: -12px 0 28px rgba(0,0,0,.18);
       transition:right .22s ease; display:flex; flex-direction:column;
     }
     .drawer.open{ right:0 }
     .drawer-head{
-      padding:14px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--aep-gray-200);
+      padding:14px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e0e0e0;
     }
     .identity{ display:flex; align-items:center; gap:12px; }
     .avatar{
@@ -187,7 +179,7 @@
     }
     .drawer-body{ padding:16px; overflow:auto }
     .kv{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px }
-    .kv .k{ color:var(--aep-gray-600); width:150px }
+    .kv .k{ color:#5c5c5c; width:150px }
     .section{ margin-top:14px }
     .section h3{ margin:0 0 10px 0; color:#111; font-size:14px; font-weight:800 }
     .close-btn, .ghost-btn{
@@ -198,7 +190,7 @@
   </style>
 </head>
 <body>
-  <!-- ===== WHITE TOP BAR with centered search ===== -->
+  <!-- Top bar -->
   <header class="topbar" role="banner" aria-label="App header">
     <div class="brand">
       <div class="logo-tile" aria-hidden="true">A</div>
@@ -215,43 +207,35 @@
     </div>
   </header>
 
-  <!-- ===== BLUE ENVIRONMENT BAR ===== -->
+  <!-- Env bar -->
   <div class="envbar" role="note" aria-label="Environment">
     <span class="env-pill" title="Current organization">PRODUCTION</span>
     <span class="env-pill" title="Datacenter / instance">Prod (VA7)</span>
   </div>
 
-  <!-- ===== SHELL ===== -->
+  <!-- Shell -->
   <div class="shell">
-    <!-- LEFT RAIL -->
     <aside class="rail" aria-label="Primary Navigation">
       <nav class="nav">
         <div class="group">
-          <a href="#">
-            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10l9-7z"/></svg>
-            Home
-          </a>
+          <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10l9-7z"/></svg> Home</a>
         </div>
-
         <div class="group">
           <h6>Workflows</h6>
           <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 4h16v4H4zM4 10h10v4H4zM4 16h16v4H4z"/></svg> Sources</a>
           <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 11h12l-3-3 1.4-1.4L19.8 12l-6.4 5.4L13 16l3-3H3z"/></svg> Destinations</a>
         </div>
-
         <div class="group">
           <h6>Customer</h6>
           <a class="active" href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-5 0-9 2.5-9 5v1h18v-1c0-2.8-3.6-5-9-5z"/></svg> Profiles</a>
           <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg> Segments</a>
           <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5z"/></svg> Identities</a>
         </div>
-
         <div class="group">
           <h6>Privacy</h6>
           <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V7h3.5L14 3.5zM8 11h8v2H8zm0 4h8v2H8z"/></svg> Policies</a>
           <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 3h16v4H4zM4 9h16v12H4zM7 12h10v2H7zm0 4h10v2H7z"/></svg> Requests</a>
         </div>
-
         <div class="group">
           <h6>Data Science</h6>
           <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h18v2H3zm0 4h18v2H3zm0 4h18v2H3z"/></svg> Services</a>
@@ -259,7 +243,6 @@
       </nav>
     </aside>
 
-    <!-- MAIN -->
     <main class="content">
       <div class="page-title">Profiles</div>
       <div class="tabs" role="tablist" aria-label="Profiles Tabs">
@@ -278,14 +261,12 @@
 
           <!-- Controls -->
           <div class="controls" aria-label="Filters">
-            <!-- Merge policy chip (cosmetic) -->
             <div class="chip" title="Current merge policy">
               <span class="label">Merge policy</span>
               <span class="value">Default Timebased</span>
               <span class="x" role="button" aria-label="Remove merge policy chip" title="Remove">✕</span>
             </div>
 
-            <!-- Identity namespace chip -->
             <div class="chip select" id="nsChip" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false" title="Select identity namespace">
               <span class="label">Identity namespace</span>
               <span class="value" id="nsValue">Consent</span>
@@ -293,18 +274,15 @@
               <div class="menu" id="nsMenu" role="listbox" aria-label="Identity namespaces"></div>
             </div>
 
-            <!-- Filter -->
             <label class="filter" title="Type to filter results by the selected identity namespace">
               <span style="color:#888;font-size:12px">Filter</span>
               <input id="filterInput" type="search" placeholder="Filter profiles (by identity value…)" aria-label="Filter profiles by identity value" />
             </label>
 
-            <!-- Primary/Secondary -->
             <button class="btn primary" id="viewBtn" aria-label="Apply filters and load">View</button>
             <button class="btn ghost" id="clearBtn" aria-label="Clear filters">Clear</button>
           </div>
 
-          <!-- Right helper controls -->
           <div class="rbar">
             <label class="toggle" title="Use local sample for testing without calling the API">
               <input id="mockToggle" type="checkbox" />
@@ -323,7 +301,6 @@
           <table role="table" aria-label="Profiles list" id="profilesTable" style="display:none;">
             <thead>
               <tr>
-                <!-- Name first (click to open profile card) -->
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
@@ -395,7 +372,7 @@
 
 <script>
 /* =========================
-   Configuration
+   Config / Elements / State
 ========================= */
 const API_URL =
   "https://default9d1d17d8372b4b23a9fc1e5d895c89.a1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a3eaffa116ac4c0cb3d7d5dc86724a8f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5X3nvYDfsc1yBZYsz6SEYNA5ZfmZf4wODLLXHMyaO4";
@@ -408,9 +385,6 @@ const NAMESPACES = [
   { key: "Phone",   hint: "Filters SUBJECT_ID for phone-like values" },
 ];
 
-/* =========================
-   Elements
-========================= */
 const nsChip = document.getElementById('nsChip');
 const nsMenu = document.getElementById('nsMenu');
 const nsValueEl = document.getElementById('nsValue');
@@ -420,26 +394,23 @@ const viewBtn = document.getElementById('viewBtn');
 const clearBtn = document.getElementById('clearBtn');
 const refreshBtn = document.getElementById('refreshBtn');
 const mockToggle = document.getElementById('mockToggle');
+
 const tbody = document.getElementById('tbody');
 const loading = document.getElementById('loading');
 const errorBox = document.getElementById('error');
 const emptyBox = document.getElementById('empty');
 const tableEl = document.getElementById('profilesTable');
 
-/* Drawer elements */
 const drawer = document.getElementById("profileDrawer");
 const backdrop = document.getElementById("backdrop");
 const btnCloseDrawer = document.getElementById("btnCloseDrawer");
 const btnCopyEmail = document.getElementById("btnCopyEmail");
 
-/* =========================
-   State
-========================= */
 let state = {
   namespace: "Consent",
   allRaw: [],
-  baseRaw: [],       // username-filtered
-  profiles: [],      // grouped
+  baseRaw: [],      // username-filtered
+  profiles: [],
   filteredProfiles: []
 };
 
@@ -461,8 +432,7 @@ function fmtDate(iso){
 }
 function parsePreferences(prefStr){
   if (!prefStr || prefStr === "[]") return [];
-  try{ return JSON.parse(prefStr); }
-  catch{ return []; }
+  try{ return JSON.parse(prefStr); } catch { return []; }
 }
 function summarizePreferences(pref){
   const parts = [];
@@ -543,7 +513,7 @@ nsClear.addEventListener('click', (e)=>{
 ========================= */
 async function fetchData(){
   if (mockToggle.checked){
-    // Sample data
+    // Sample rows to test quickly
     return [
       {
         "@odata.etag": "",
@@ -598,25 +568,33 @@ async function fetchData(){
   const res = await fetch(API_URL, { method:"GET" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const json = await res.json();
-  if (!Array.isArray(json)) throw new Error("Unexpected API response; expected an array of profiles.");
+  if (!Array.isArray(json)) throw new Error("Unexpected API response; expected an array.");
   return json;
 }
+
+/* =========================
+   View state helpers
+========================= */
 function showLoading(on){
-  loading.hidden = !on;
-  // If showing loading, hide other states and table
   if (on){
+    loading.hidden = false;
+    loading.style.display = "flex";
     errorBox.hidden = true;
     emptyBox.hidden = true;
     tableEl.style.display = "none";
+  }else{
+    loading.hidden = true;
+    loading.style.display = "none";
   }
 }
 function showError(msg){
   errorBox.hidden = false;
   errorBox.textContent = msg || "Could not load profiles.";
+  tableEl.style.display = "none";
 }
 
 /* =========================
-   Filter target set (by namespace + query)
+   Filtering & Grouping
 ========================= */
 function matchingProfileIdSet(raw, namespace, queryLower){
   if (!queryLower) {
@@ -647,10 +625,6 @@ function matchingProfileIdSet(raw, namespace, queryLower){
   });
   return ids;
 }
-
-/* =========================
-   Grouping with purpose pills
-========================= */
 function groupByProfile(includeIds, raw){
   const bucket = new Map();
   raw.forEach(r=>{
@@ -671,7 +645,6 @@ function groupByProfile(includeIds, raw){
     }
     const p = bucket.get(key);
 
-    // Keep first non-empty values
     if (!p.Email && (r.EMAIL || looksLikeEmail(r.SUBJECT_ID))) p.Email = r.EMAIL || r.SUBJECT_ID;
     if (!p.Name){
       const n = [r.FirstName, r.LastName].filter(Boolean).join(" ").trim();
@@ -681,10 +654,8 @@ function groupByProfile(includeIds, raw){
     if (!p.Country && r.Country) p.Country = r.Country;
     if (!p.City && r.City) p.City = r.City;
 
-    // UpdatedAt = most recent
     if (r.UPDATED_AT) p.UpdatedAtISO = maxDate(p.UpdatedAtISO, r.UPDATED_AT);
 
-    // Purpose meta
     const purposeName = r.PURPOSE_NAME || "";
     if (purposeName){
       if (!p.purposeMeta.has(purposeName)){
@@ -698,7 +669,6 @@ function groupByProfile(includeIds, raw){
       const prefArr = parsePreferences(r.PREFERENCES);
       const summary = summarizePreferences(prefArr);
       const iconStr = channelIcons(prefArr);
-
       const meta = p.purposeMeta.get(purposeName);
       if (summary) meta.summaries.add(summary);
       if (iconStr) iconStr.split(" ").forEach(ic => ic && meta.icons.add(ic));
@@ -706,7 +676,6 @@ function groupByProfile(includeIds, raw){
     }
   });
 
-  // Finalize
   const list = Array.from(bucket.values()).map(p => {
     const purposes = Array.from(p.purposeMeta.values()).map(meta => ({
       name: meta.name,
@@ -725,11 +694,13 @@ function groupByProfile(includeIds, raw){
     };
   });
 
-  // Sort newest first
   list.sort((a,b)=> new Date(b.UpdatedAt) - new Date(a.UpdatedAt));
   return list;
 }
 
+/* =========================
+   Rendering
+========================= */
 function purposePillsHTML(items){
   if (!items || !items.length) return "—";
   return `<div class="pills">` + items.map(it => {
@@ -741,10 +712,6 @@ function purposePillsHTML(items){
     return `<span class="pill" title="${esc(title)}">${icons}${esc(it.name)}</span>`;
   }).join('') + `</div>`;
 }
-
-/* =========================
-   Rendering
-========================= */
 function renderTable(rows){
   if (!rows.length){
     tbody.innerHTML = '';
@@ -767,16 +734,8 @@ function renderTable(rows){
   `).join('');
 }
 
-function applyFilterAndGroup(){
-  const q = (filterInput.value || "").trim().toLowerCase();
-  const ids = matchingProfileIdSet(state.baseRaw, state.namespace, q);
-  state.profiles = groupByProfile(ids, state.baseRaw);
-  state.filteredProfiles = state.profiles.slice();
-  renderTable(state.filteredProfiles);
-}
-
 /* =========================
-   Drawer (profile)
+   Drawer
 ========================= */
 function initialsFromEmail(email){
   const s = (email||"").trim();
@@ -830,12 +789,12 @@ function openProfile(email){
     });
   }
 
-  // Open
+  // open
   backdrop.classList.add("open");
   drawer.classList.add("open");
   drawer.setAttribute("aria-hidden","false");
 
-  // Update hash
+  // hash
   location.hash = "profile=" + encodeURIComponent(email || "");
 }
 function closeProfile(){
@@ -855,14 +814,14 @@ btnCopyEmail.addEventListener("click", ()=>{
 });
 
 /* =========================
-   Load (with username filter) + render
+   Load + username filter + render
 ========================= */
 async function loadAndRender(){
   showLoading(true);
   try{
     const raw = await fetchData();
 
-    // Username prefilter (?username=...) on USERNAME_EMAIL (contains, case-insensitive)
+    // URL username prefilter (contains, case-insensitive) on USERNAME_EMAIL
     const username = getUsernameFromUrl().toLowerCase();
     state.allRaw = raw;
     state.baseRaw = username
@@ -871,39 +830,76 @@ async function loadAndRender(){
 
     applyFilterAndGroup();
 
-    // SUCCESS: hide loading, show table
-    showLoading(false);
+    // success
     tableEl.style.display = "table";
-
-    // Deep link (#profile=email)
-    const hash = decodeURIComponent(location.hash || "").trim();
-    const m = hash.match(/^#profile=(.+)$/i);
-    if(m && m[1]) openProfile(m[1]);
+    errorBox.hidden = true;
   }catch(err){
     console.error(err);
     showError("Could not load profiles. " + (err?.message || ""));
   }finally{
-    // Ensure loading hides even if something goes wrong after fetch/render
-    if (!loading.hidden) loading.hidden = true;
+    // enforce hiding loading regardless of above branches
+    showLoading(false);
+  }
+
+  // Deep link (#profile=email)
+  try{
+    const hash = decodeURIComponent(location.hash || "").trim();
+    const m = hash.match(/^#profile=(.+)$/i);
+    if(m && m[1]) openProfile(m[1]);
+  }catch{}
+}
+
+/* =========================
+   Apply filter + group (render)
+========================= */
+function applyFilterAndGroup(){
+  try{
+    const q = (filterInput.value || "").trim().toLowerCase();
+    const ids = matchingProfileIdSet(state.baseRaw, state.namespace, q);
+    state.profiles = groupByProfile(ids, state.baseRaw);
+    state.filteredProfiles = state.profiles.slice();
+    renderTable(state.filteredProfiles);
+  }catch(err){
+    console.error("Render error:", err);
+    showError("Failed to render profiles.");
   }
 }
 
 /* =========================
    Events
 ========================= */
-function onNameClickDelegate(e){
+tbody.addEventListener("click", function(e){
   const a = e.target.closest("a.profile-link");
   if (a){
     e.preventDefault();
     const email = a.getAttribute("data-email") || "";
     if (email) openProfile(email);
   }
-}
-tbody.addEventListener("click", onNameClickDelegate);
+});
 
-viewBtn.addEventListener('click', loadAndRender);
-refreshBtn.addEventListener('click', loadAndRender);
-clearBtn.addEventListener('click', ()=>{
+function renderNamespaceMenuWrapper(){
+  nsMenu.innerHTML = '';
+  NAMESPACES.forEach(ns => {
+    const a = document.createElement('a');
+    a.href = "#";
+    a.role = "option";
+    a.textContent = ns.key + " — " + ns.hint;
+    if (ns.key === state.namespace) a.classList.add('active');
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      state.namespace = ns.key;
+      nsValueEl.textContent = ns.key;
+      nsMenu.classList.remove('open');
+      nsChip.setAttribute('aria-expanded','false');
+      applyFilterAndGroup();
+    });
+    nsMenu.appendChild(a);
+  });
+}
+
+document.getElementById('viewBtn').addEventListener('click', loadAndRender);
+document.getElementById('refreshBtn').addEventListener('click', loadAndRender);
+document.getElementById('clearBtn').addEventListener('click', ()=>{
   filterInput.value = "";
   applyFilterAndGroup();
 });
@@ -913,6 +909,9 @@ filterInput.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') loadAndRen
 /* Init */
 (function init(){
   nsValueEl.textContent = state.namespace;
+  renderNamespaceMenu();
+  // use the wrapper name here to avoid shadowing
+  function renderNamespaceMenu(){ renderNamespaceMenuWrapper(); }
   renderNamespaceMenu();
   loadAndRender();
 })();
