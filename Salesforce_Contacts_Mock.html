@@ -1,0 +1,746 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" type="image/x-icon" href="SalesforceFavicon.png">
+<title>Salesforce CRM — Contacts</title>
+
+<style>
+:root{
+  --bg:#f3f2f2; --border:#d9d9d9; --border-2:#e5e5e5; --text:#1f1f1f; --muted:#5f6a7d;
+  --brand:#0176d3; --brand-600:#0b5cab; --ink:#032d60; --tab-bg:#fff; --tab-hover:#f7f9fb;
+  --header-bg:#fff; --card-bg:#fff; --pill-bg:#eef4ff; --success:#2e844a; --error:#ba0517;
+  --warn:#fe9339; --table-header:#f3f3f3; --shadow:0 1px 2px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+.app-shell{max-width:1600px; margin:0 auto}
+
+/* ---------- Context bar ---------- */
+.context-bar{
+  display:grid; grid-template-columns: 1fr auto 1fr;
+  align-items:center; background:var(--tab-bg);
+  border-bottom:1px solid var(--border); height:64px; padding:0 12px;
+}
+.left-chunk{display:flex; align-items:center; gap:12px}
+.sf-logo{height:28px; width:auto; display:block}
+.app-name{color:var(--ink); font-weight:700; white-space:nowrap; font-size:15px}
+
+.center-chunk{display:flex; justify-content:center; align-items:center}
+.searchbar{
+  display:flex; align-items:center; gap:8px; width:min(560px, 60vw);
+  border:1px solid #c9c9c9; border-radius:6px; padding:6px 10px; background:#fff;
+}
+.searchbar input{
+  border:none; outline:none; width:100%; font-size:14px; color:#1f1f1f; background:transparent;
+}
+.icon{width:16px;height:16px;fill:currentColor}
+
+.right-chunk{display:flex; align-items:center; justify-content:flex-end; gap:12px}
+.util-avatar{
+  width:28px; height:28px; border-radius:50%; display:grid; place-items:center;
+  background:#cfd3d9; color:#244; font-weight:700; font-size:12px;
+}
+
+/* ---------- Tabs ---------- */
+.tabs-bar{
+  background:#fff; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:6px; overflow:auto; scrollbar-width:none; padding:0 8px;
+}
+.tabs-bar::-webkit-scrollbar{display:none}
+.tab{
+  position:relative; color:var(--ink); font-size:14px; padding:12px 12px; border-radius:6px; text-decoration:none;
+}
+.tab:hover{background:var(--tab-hover)}
+.tab.active{color:var(--brand); font-weight:700; background:#eaf2fe}
+.tab.active::after{
+  content:""; position:absolute; left:10px; right:10px; bottom:-1px;
+  border-bottom:3px solid var(--brand); border-radius:2px;
+}
+
+/* ---------- Page header ---------- */
+.page-header{background:var(--header-bg); border-bottom:1px solid var(--border); padding:18px 16px}
+.header-row{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.obj{display:flex; gap:12px; align-items:center}
+.obj-icon{
+  width:36px; height:36px; border-radius:8px; background:#6f2edc; color:#fff;
+  display:grid; place-items:center; font-weight:800; font-size:18px; box-shadow:var(--shadow);
+}
+.obj-title{font-size:22px; font-weight:700; color:var(--ink)}
+.meta{margin-top:2px; color:var(--muted); font-size:13px}
+.badge-soft{
+  display:inline-block; padding:3px 8px; border-radius:999px;
+  background:#f5f7fb; color:var(--ink); font-weight:600; font-size:12px;
+  border:1px solid var(--border);
+}
+.actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.btn{
+  appearance:none; border:none; cursor:pointer; border-radius:6px; font-size:14px; padding:7px 14px;
+  transition:.15s ease-in-out; display:inline-flex; align-items:center; gap:8px;
+}
+.btn:focus{outline:none; box-shadow:0 0 0 3px rgba(1,118,211,.25)}
+.btn-brand{background:var(--brand); color:#fff}
+.btn-brand:hover{background:var(--brand-600)}
+.btn-neutral{background:#fff; border:1px solid #c9c9c9; color:#18263a}
+.btn-neutral:hover{background:#f6f8fa}
+.icon-btn{
+  width:34px; height:34px; display:grid; place-items:center; background:#fff; border:1px solid #c9c9c9; border-radius:6px;
+}
+.icon-btn:hover{background:#f6f8fa}
+
+/* ---------- Sub search ---------- */
+.page-sub{margin-top:10px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.label{font-size:13px; color:var(--muted)}
+.input{border:1px solid #c9c9c9; border-radius:6px; padding:7px 10px; font-size:14px}
+
+/* ---------- Card + table ---------- */
+.container{padding:12px}
+.card{background:var(--card-bg); border:1px solid var(--border); border-radius:8px; box-shadow:var(--shadow)}
+.loading{display:flex; align-items:center; gap:10px; padding:16px; color:var(--muted)}
+.spinner{width:22px;height:22px;border-radius:50%;border:3px solid #d7e6fb;border-top-color:var(--brand);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.table-wrap{width:100%; overflow:auto}
+table{width:100%; border-collapse:collapse}
+thead{background:var(--table-header)}
+th,td{padding:10px 14px; font-size:14px; text-align:left; white-space:nowrap; border-bottom:1px solid var(--border-2)}
+tr:hover{background:#fafafa}
+th{font-size:12.5px; color:#4a4a4a}
+.th-sort{display:inline-flex; align-items:center; gap:6px}
+.sort-arrow{width:6px; height:6px; border-right:2px solid #999; border-bottom:2px solid #999; transform:rotate(45deg)}
+.link{color:var(--brand); text-decoration:none}
+.link:hover{text-decoration:underline}
+
+/* Badges */
+.badge{display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; color:#fff}
+.badge.success{background:var(--success)} .badge.error{background:var(--error)} .badge.warn{background:var(--warn)} .badge.neutral{background:#9aa5b1}
+
+/* Preferences */
+.pills{display:flex; flex-wrap:wrap; gap:6px}
+.pill{display:inline-block; padding:4px 10px; border-radius:999px; background:var(--pill-bg); color:var(--ink); font-weight:600; font-size:12px; border:1px solid #d6e2ff}
+
+/* ---------- Pagination ---------- */
+.pager{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 14px; color:var(--muted); border-top:1px solid var(--border-2)}
+.pager-left{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.pager-right{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.page-btn{min-width:32px; height:32px; padding:0 8px; border:1px solid #c9c9c9; background:#fff; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px}
+.page-btn:hover{background:#f6f8fa}
+.page-btn[disabled]{opacity:.5; cursor:not-allowed}
+.page-btn.active{background:#eaf2fe; border-color:#a7c7f7; color:var(--brand); font-weight:700}
+
+/* ---------- Contact drawer ---------- */
+.backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.35); opacity:0; pointer-events:none; transition:opacity .2s ease;
+}
+.backdrop.open{opacity:1; pointer-events:auto}
+.drawer{
+  position:fixed; top:0; right:-900px; height:100%; width:min(900px, 92vw);
+  background:#fff; border-left:1px solid var(--border); box-shadow: -12px 0 24px rgba(0,0,0,.12);
+  transition:right .25s ease; display:flex; flex-direction:column;
+}
+.drawer.open{right:0}
+.drawer-head{
+  display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--border-2);
+}
+.contact-id{ display:flex; align-items:center; gap:12px; }
+.avatar{
+  width:36px; height:36px; border-radius:50%; background:#e9eefb; color:#0b5cab; font-weight:800; display:grid; place-items:center
+}
+.drawer-body{padding:16px; overflow:auto}
+.kv{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px}
+.kv .k{color:var(--muted); width:160px}
+.section{margin-top:12px}
+.section h3{font-size:14px; color:var(--ink); margin:10px 0}
+.close-btn{border:1px solid #c9c9c9; background:#fff; border-radius:6px; height:32px; padding:0 10px; cursor:pointer}
+.copy-btn{border:1px solid #c9c9c9; background:#fff; border-radius:6px; height:28px; padding:0 8px; cursor:pointer; font-size:12px}
+.empty{color:var(--muted); font-style:italic}
+
+/* Even wider mode (toggle) */
+.drawer.wide { width: min(1400px, 98vw); right: 0; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Context bar -->
+  <div class="context-bar">
+    <div class="left-chunk">
+      <img class="sf-logo" alt="Salesforce logo"
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Salesforce.com_logo.svg/1280px-Salesforce.com_logo.svg.png">
+      <div class="app-name" title="Salesforce CRM">Salesforce CRM</div>
+    </div>
+
+    <div class="center-chunk">
+      <div class="searchbar" role="search">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.471 6.471 0 10-.71.71l.27.28v.79L20 21.5 21.5 20l-6-6zM6.5 11a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z"/></svg>
+        <input id="searchList" type="text" placeholder="Search contacts..." aria-label="Global search">
+      </div>
+    </div>
+
+    <div class="right-chunk">
+      <div class="util-avatar" title="User">AB</div>
+    </div>
+  </div>
+
+  <!-- Tabs (Contacts active; Purposes present) -->
+  <nav class="tabs-bar" aria-label="Primary">
+    <a href="#" class="tab">Home</a>
+    <a href="#" class="tab">Campaigns</a>
+    <a href="#" class="tab">Leads</a>
+    <a id="tabPurposes" href="#" class="tab">Purposes</a>
+    <a href="#" class="tab">Accounts</a>
+    <a href="#" class="tab">Opportunities</a>
+    <a href="#" class="tab">Reports</a>
+    <a href="#" class="tab">Dashboards</a>
+    <a id="tabContacts" href="#" class="tab active">Contacts</a>
+    <a href="#" class="tab">OneTrust Ideas</a>
+    <a href="#" class="tab">Email Templates</a>
+    <a href="#" class="tab">Email Service Logs</a>
+  </nav>
+
+  <!-- Object header -->
+  <header class="page-header">
+    <div class="header-row">
+      <div class="obj">
+        <div class="obj-icon" aria-hidden="true">C</div>
+        <div>
+          <div class="obj-title">Contacts</div>
+          <div class="meta">
+            <span>List View:</span>
+            <span class="badge-soft" id="listName">All Contacts</span>
+            <span id="metaCounts"> • 0 contacts • Updated —</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-brand">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/></svg>
+          New
+        </button>
+        <button class="btn btn-neutral">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v5h4v4h12v-4h4v-5c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 .99.45.99 1-.44 1-.99 1zM18 3H6v4h12V3z"/></svg>
+          Printable View
+        </button>
+        <button class="icon-btn" title="Refresh" id="btnRefresh">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1L7 6l5 5V7c2.76 0 5 2.24 5 5a5 5 0 0 1-8.66 3.54l-1.42 1.42A7 7 0 1 0 19 12c0-1.93-.78-3.68-2.05-4.95z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Card + Table -->
+  <div class="container">
+    <div class="card">
+      <div id="loading" class="loading">
+        <div class="spinner" aria-hidden="true"></div>
+        <span>Loading contacts...</span>
+      </div>
+
+      <div class="table-wrap">
+        <table id="contactTable" role="grid" aria-label="Contacts" style="display:none;">
+          <thead>
+            <tr>
+              <th scope="col"><span class="th-sort">Full Name <span class="sort-arrow"></span></span></th>
+              <th scope="col">Email</th>
+              <th scope="col">City</th>
+              <th scope="col">Country</th>
+              <th scope="col">Phone</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div id="pager" class="pager" style="display:none;">
+        <div class="pager-left">
+          <span id="rangeText">Showing 0–0 of 0</span>
+          <label class="label" for="rowsPerPage">Rows per page</label>
+          <select id="rowsPerPage" class="input" style="width:auto; padding:6px 8px;">
+            <option>25</option>
+            <option selected>50</option>
+            <option>100</option>
+          </select>
+        </div>
+        <div class="pager-right" id="pageButtons"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contact drawer + backdrop -->
+<div id="backdrop" class="backdrop" aria-hidden="true"></div>
+<div id="contactDrawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+  <div class="drawer-head">
+    <div class="contact-id">
+      <div id="contactAvatar" class="avatar">?</div>
+      <div>
+        <div id="contactTitle" class="obj-title" style="font-size:18px">Contact</div>
+        <div id="contactSubtitle" class="meta">—</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button id="btnCopyEmail" class="copy-btn" title="Copy email">Copy email</button>
+      <button class="close-btn" id="btnCloseDrawer" title="Close">Close ✕</button>
+      <button id="btnToggleWide" class="copy-btn" title="Toggle wide">Expand</button>
+    </div>
+  </div>
+  <div class="drawer-body">
+    <div class="section">
+      <h3>Details</h3>
+      <div class="kv"><div class="k">Full Name</div><div id="contactNameVal">—</div></div>
+      <div class="kv"><div class="k">Email</div><div id="contactEmailVal">—</div></div>
+      <div class="kv"><div class="k">City</div><div id="contactCityVal">—</div></div>
+      <div class="kv"><div class="k">Country</div><div id="contactCountryVal">—</div></div>
+      <div class="kv"><div class="k">Phone</div><div id="contactPhoneVal">—</div></div>
+      <div class="kv"><div class="k">Total Purposes</div><div id="contactCount">0</div></div>
+      <div class="kv"><div class="k">Last Updated</div><div id="contactLastUpdated">—</div></div>
+    </div>
+
+    <div class="section">
+      <h3>Purposes</h3>
+      <div class="table-wrap">
+        <table role="grid" aria-label="Purposes for Contact">
+          <thead>
+            <tr>
+              <th scope="col">Id</th>
+              <th scope="col">PURPOSE NAME</th>
+              <th scope="col">CONSENT TYPE</th>
+              <th scope="col">PREFERENCES</th>
+              <th scope="col">UPDATED AT</th>
+            </tr>
+          </thead>
+          <tbody id="contactPurposesBody">
+            <tr><td colspan="5" class="empty">No purposes found for this contact.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* -------------------------------
+   API endpoint (your Flow)
+-------------------------------- */
+const API_URL =
+  "https://default9d1d17d8372b4b23a9fc1e5d895c89.a1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a3eaffa116ac4c0cb3d7d5dc86724a8f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5X3nvYDfsc1yBZYsz6SEYNA5ZfmZf4wODLLXHMyaO4";
+
+/* -------------------------------
+   State
+-------------------------------- */
+let allRows = [];          // raw rows from API
+let baseRows = [];         // username-filtered rows (if ?username)
+let contacts = [];         // grouped contacts (array)
+let filteredContacts = []; // post-search contacts array
+
+let currentPage = 1;
+let pageSize = 50;
+
+/* -------------------------------
+   Helpers
+-------------------------------- */
+const HTML_ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, ch => HTML_ENTITIES[ch]); }
+function fmtDate(iso){
+  if(!iso) return "";
+  try{
+    const loc = navigator.language || "en-GB";
+    return new Date(iso).toLocaleString(loc, {year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hour12:false});
+  }catch(e){ return new Date(iso).toLocaleString(); }
+}
+function parsePreferences(prefStr){
+  if(!prefStr) return [];
+  try{
+    const parsed = JSON.parse(prefStr);
+    if(!Array.isArray(parsed)) return [];
+    const pills = [];
+    parsed.forEach(cat=>{
+      const catName = cat?.name ?? "";
+      (cat?.options ?? []).forEach(opt=>{
+        if(String(opt?.value ?? "").toLowerCase()==="true"){
+          const label = (catName ? (catName + ": ") : "") + (opt?.name ?? "");
+          if(label.trim()) pills.push(label);
+        }
+      });
+    });
+    return pills;
+  }catch(e){
+    return String(prefStr).split(",").map(s=>s.trim()).filter(Boolean);
+  }
+}
+function initialsFromEmail(email){
+  const s = (email||"").trim();
+  const ch = s.match(/[a-zA-Z]/)?.[0] || s.charAt(0) || "?";
+  return ch.toUpperCase();
+}
+function getUsernameFromUrl(){
+  const params = new URLSearchParams(location.search);
+  return (params.get("username") || "").trim();
+}
+function buildNavUrl(fileName){
+  const qs = location.search || "";
+  const hash = location.hash || "";
+  return `${fileName}${qs}${hash}`;
+}
+
+/* -------------------------------
+   Grouping: Purposes -> Contacts
+-------------------------------- */
+function groupByContact(rows){
+  const map = new Map();
+  rows.forEach(r=>{
+    const rawEmail = String(r.EMAIL || r.SUBJECT_ID || "").trim();
+    const emailKey = rawEmail.toLowerCase();
+    const usernameKey = String(r.USERNAME_EMAIL || "").toLowerCase();
+    const key = emailKey || (usernameKey ? `user:${usernameKey}` : `row:${(r.ItemInternalId||'')}`);
+
+    if(!map.has(key)){
+      map.set(key, {
+        key,
+        email: rawEmail,
+        username: String(r.USERNAME_EMAIL || ""),
+        firstName: String(r.FirstName || ""),
+        lastName: String(r.LastName || ""),
+        city: String(r.City || ""),
+        country: String(r.Country || ""),
+        phone: String(r.Phone || ""),
+        purposes: [],
+        lastUpdated: 0
+      });
+    }
+    const c = map.get(key);
+
+    // Keep first non-empty values
+    if(!c.email && rawEmail) c.email = rawEmail;
+    if(!c.firstName && r.FirstName) c.firstName = r.FirstName;
+    if(!c.lastName && r.LastName) c.lastName = r.LastName;
+    if(!c.city && r.City) c.city = r.City;
+    if(!c.country && r.Country) c.country = r.Country;
+    if(!c.phone && r.Phone) c.phone = r.Phone;
+    if(!c.username && r.USERNAME_EMAIL) c.username = r.USERNAME_EMAIL;
+
+    // Purposes
+    c.purposes.push({
+      id: r.ItemInternalId || r.ID || r.Id || r.id || "",
+      name: r.PURPOSE_NAME || "",
+      consent: r.CONSENT_TYPE || "",
+      prefs: r.PREFERENCES || "[]",
+      updatedAt: r.UPDATED_AT || ""
+    });
+
+    // Last updated (max)
+    const ts = Date.parse(r.UPDATED_AT || "");
+    if(!isNaN(ts)) c.lastUpdated = Math.max(c.lastUpdated, ts);
+  });
+
+  return Array.from(map.values()).map(c => ({
+    ...c,
+    fullName: `${(c.firstName||"").trim()} ${(c.lastName||"").trim()}`.trim(),
+    lastUpdatedIso: c.lastUpdated ? new Date(c.lastUpdated).toISOString() : ""
+  }));
+}
+
+/* -------------------------------
+   Rendering
+-------------------------------- */
+function renderContactsPage(){
+  const tbody = document.getElementById("tableBody");
+  const table = document.getElementById("contactTable");
+  const pager = document.getElementById("pager");
+  const rangeText = document.getElementById("rangeText");
+
+  const total = filteredContacts.length;
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  currentPage = Math.min(Math.max(1, currentPage), pageCount);
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, total);
+  const pageSlice = filteredContacts.slice(startIndex, endIndex);
+
+  tbody.innerHTML = "";
+  pageSlice.forEach(c=>{
+    const name = c.fullName || "—";
+    const email = c.email || "";
+    const city = c.city || "—";
+    const country = c.country || "—";
+    const phone = c.phone || "—";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${email ? `<a href="#" class="link contact-link" data-email="${esc(email)}">${esc(name)}</a>` : esc(name)}</td>
+      <td>${email ? esc(email) : "—"}</td>
+      <td>${esc(city)}</td>
+      <td>${esc(country)}</td>
+      <td>${esc(phone)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  table.style.display = total ? "table" : "none";
+  pager.style.display = total ? "flex" : "none";
+  rangeText.textContent = total ? `Showing ${total ? (startIndex+1) : 0}–${endIndex} of ${total}` : "No results";
+
+  renderPageButtons(pageCount);
+  updateHeaderMeta();
+}
+
+function renderPageButtons(pageCount){
+  const wrap = document.getElementById("pageButtons");
+  wrap.innerHTML = "";
+
+  const prev = document.createElement("button");
+  prev.className = "page-btn";
+  prev.textContent = "‹";
+  prev.disabled = currentPage === 1;
+  prev.onclick = () => { currentPage--; renderContactsPage(); };
+  wrap.appendChild(prev);
+
+  const pages = [];
+  const add = p => { if(!pages.includes(p) && p>=1 && p<=pageCount) pages.push(p); };
+  add(1); add(pageCount);
+  add(currentPage-2); add(currentPage-1); add(currentPage); add(currentPage+1); add(currentPage+2);
+  pages.sort((a,b)=>a-b);
+
+  let last = 0;
+  pages.forEach(p=>{
+    if(p - last > 1){
+      const dots = document.createElement("span");
+      dots.textContent = "…";
+      dots.style.margin = "0 4px";
+      wrap.appendChild(dots);
+    }
+    const btn = document.createElement("button");
+    btn.className = "page-btn" + (p===currentPage ? " active" : "");
+    btn.textContent = String(p);
+    btn.onclick = () => { currentPage = p; renderContactsPage(); };
+    wrap.appendChild(btn);
+    last = p;
+  });
+
+  const next = document.createElement("button");
+  next.className = "page-btn";
+  next.textContent = "›";
+  next.disabled = currentPage === pageCount;
+  next.onclick = () => { currentPage++; renderContactsPage(); };
+  wrap.appendChild(next);
+}
+
+function updateHeaderMeta(){
+  const meta = document.getElementById("metaCounts");
+  const contactsCount = contacts.length;
+  const lastUpdated = contacts.reduce((acc,c)=>Math.max(acc, c.lastUpdated || 0), 0);
+  const text = ` • ${contactsCount} contact${contactsCount===1?"":"s"} • Updated ${lastUpdated ? fmtDate(new Date(lastUpdated).toISOString()) : "—"}`;
+  meta.textContent = text;
+}
+
+/* -------------------------------
+   Data load + username filter + group
+-------------------------------- */
+async function loadContacts(){
+  const loading = document.getElementById("loading");
+  const table = document.getElementById("contactTable");
+
+  try{
+    const res = await fetch(API_URL, { method: "GET" });
+    if(!res.ok) throw new Error("Network response was not ok: " + res.status);
+    const data = await res.json();
+    if(!Array.isArray(data)) throw new Error("Unexpected payload format (expected an array).");
+
+    allRows = data;
+
+    // Username filter on USERNAME_EMAIL (contains, case-insensitive)
+    const username = getUsernameFromUrl().toLowerCase();
+    if (username) {
+      baseRows = allRows.filter(r =>
+        String(r.USERNAME_EMAIL || "").toLowerCase().includes(username)
+      );
+    } else {
+      baseRows = allRows.slice();
+    }
+
+    // Group by contact (email or username fallback)
+    contacts = groupByContact(baseRows);
+
+    // Initial view
+    filteredContacts = contacts.slice();
+
+    loading.style.display = "none";
+    table.style.display = "table";
+    renderContactsPage();
+
+    // Deep link (#contact=email) → open drawer if present
+    const hash = decodeURIComponent(location.hash || "").trim();
+    const m = hash.match(/^#contact=(.+)$/i);
+    if(m && m[1]) openContactView(m[1]);
+  }catch(err){
+    console.error(err);
+    loading.innerHTML = '<span style="color:#ba0517">Error loading contacts. Check CORS/network or the Flow response.</span>';
+  }
+}
+
+/* -------------------------------
+   Contact drawer
+-------------------------------- */
+const drawer = document.getElementById("contactDrawer");
+const backdrop = document.getElementById("backdrop");
+const btnCloseDrawer = document.getElementById("btnCloseDrawer");
+const btnCopyEmail = document.getElementById("btnCopyEmail");
+const btnToggleWide = document.getElementById("btnToggleWide");
+
+function openContactView(email){
+  const emailLc = (email||"").toLowerCase();
+  const items = baseRows.filter(x => ((x.EMAIL || x.SUBJECT_ID || "") + "").toLowerCase() === emailLc);
+
+  const rep = items[0] || {};
+  const fullName = `${(rep.FirstName || "").trim()} ${(rep.LastName || "").trim()}`.trim();
+
+  // Always start in non-wide mode for consistency
+  drawer.classList.remove("wide");
+  if (btnToggleWide) btnToggleWide.textContent = "Expand";
+
+  // Header & details
+  document.getElementById("contactAvatar").textContent = initialsFromEmail(email);
+  document.getElementById("contactTitle").textContent = fullName || "Contact";
+  document.getElementById("contactSubtitle").textContent = email || "—";
+  document.getElementById("contactNameVal").textContent = fullName || "—";
+  document.getElementById("contactEmailVal").textContent = email || "—";
+  document.getElementById("contactCityVal").textContent = rep.City || "—";
+  document.getElementById("contactCountryVal").textContent = rep.Country || "—";
+  document.getElementById("contactPhoneVal").textContent = rep.Phone || "—";
+  document.getElementById("contactCount").textContent = String(items.length);
+
+  const maxUpdated = items.reduce((acc, it)=>{
+    const t = Date.parse(it.UPDATED_AT || "");
+    return isNaN(t) ? acc : Math.max(acc, t);
+  }, 0);
+  document.getElementById("contactLastUpdated").textContent = maxUpdated ? fmtDate(new Date(maxUpdated).toISOString()) : "—";
+
+  // Purposes table
+  const body = document.getElementById("contactPurposesBody");
+  body.innerHTML = "";
+  if(items.length === 0){
+    body.innerHTML = '<tr><td class="empty" colspan="5">No purposes found for this contact.</td></tr>';
+  }else{
+    items.forEach(it=>{
+      const id = it.ItemInternalId || it.ID || it.Id || it.id || "";
+      const purpose = it.PURPOSE_NAME || "";
+      const consent = (it.CONSENT_TYPE || "");
+      const prefs = parsePreferences(it.PREFERENCES || "[]");
+      const updatedAt = fmtDate(it.UPDATED_AT);
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${esc(id)}</td>
+        <td>${esc(purpose)}</td>
+        <td>${esc(consent.toUpperCase())}</td>
+        <td>${prefs.length ? '<div class="pills">' + prefs.map(p=>'<span class="pill">'+esc(p)+'</span>').join('') + '</div>' : '—'}</td>
+        <td>${esc(updatedAt) || "—"}</td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  // Open
+  backdrop.classList.add("open");
+  drawer.classList.add("open");
+  drawer.setAttribute("aria-hidden","false");
+
+  // Update hash
+  location.hash = "contact=" + encodeURIComponent(email || "");
+}
+
+/* Close the drawer fully (including expanded state) */
+function closeContactView(){
+  // Close and reset expansion state
+  drawer.classList.remove("open");
+  drawer.classList.remove("wide");              // <-- ensure wide/expanded is cleared
+  if (btnToggleWide) btnToggleWide.textContent = "Expand"; // <-- reset toggle label
+
+  backdrop.classList.remove("open");
+  drawer.setAttribute("aria-hidden","true");
+
+  // Clean hash if it was ours
+  if(location.hash.startsWith("#contact=")){
+    history.replaceState(null, "", location.pathname + location.search);
+  }
+}
+
+/* Drawer controls */
+backdrop.addEventListener("click", closeContactView);
+btnCloseDrawer.addEventListener("click", closeContactView);
+document.addEventListener("keydown", (e)=>{ if(e.key === "Escape") closeContactView(); });
+btnCopyEmail.addEventListener("click", ()=>{
+  const email = document.getElementById("contactEmailVal").textContent || "";
+  if(navigator.clipboard && email) navigator.clipboard.writeText(email);
+});
+
+/* Expand/Shrink toggle */
+if (btnToggleWide) {
+  btnToggleWide.addEventListener("click", () => {
+    const isWide = drawer.classList.toggle("wide");
+    btnToggleWide.textContent = isWide ? "Shrink" : "Expand";
+  });
+}
+
+/* Delegate clicks on Name links (open contact drawer) */
+document.getElementById("tableBody").addEventListener("click", function(e){
+  const a = e.target.closest("a.contact-link");
+  if (a) {
+    e.preventDefault();
+    const email = a.getAttribute("data-email") || "";
+    if (email) openContactView(email);
+  }
+});
+
+/* -------------------------------
+   Interactions
+-------------------------------- */
+document.getElementById("searchList").addEventListener("input", function(){
+  const q = this.value.toLowerCase().trim();
+  filteredContacts = contacts.filter(c=>{
+    const hay = `${c.fullName} ${c.email} ${c.city} ${c.country} ${c.phone}`.toLowerCase();
+    return hay.includes(q);
+  });
+  currentPage = 1;
+  renderContactsPage();
+});
+
+document.getElementById("rowsPerPage").addEventListener("change", function(){
+  pageSize = parseInt(this.value, 10) || 50;
+  currentPage = 1;
+  renderContactsPage();
+});
+
+document.getElementById("btnRefresh").addEventListener("click", () => {
+  const loading = document.getElementById("loading");
+  document.getElementById("contactTable").style.display = "none";
+  document.getElementById("pager").style.display = "none";
+  loading.style.display = "flex";
+  loadContacts();
+});
+
+/* -------------------------------
+   Tabs: set links + active state
+-------------------------------- */
+(function wireTabs(){
+  const tabPurposes = document.getElementById("tabPurposes");
+  const tabContacts = document.getElementById("tabContacts");
+  if (tabPurposes) tabPurposes.href = buildNavUrl("Salesforce_Purposes_Mock.html");
+  if (tabContacts) tabContacts.href = buildNavUrl("Salesforce_Contacts_Mock.html");
+  // Contacts already marked active in HTML
+})();
+
+/* Kick off */
+loadContacts();
+</script>
+</body>
+</html>

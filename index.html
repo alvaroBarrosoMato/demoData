@@ -50,13 +50,27 @@
     .subtitle { margin: 10px 0 0; color: var(--muted); font-size: 14px; max-width: 80ch; }
 
     .toolbar { display: flex; gap: 12px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
-    .search { position: relative; flex: 1 1 320px; min-width: 240px; }
-    .search input {
-      width: 100%; padding: 12px 14px 12px 40px; border-radius: 10px;
-      border: 1px solid var(--border); background: var(--card); color: var(--text);
-      outline: none; box-shadow: var(--shadow);
+
+    /* Field wrappers to keep styling consistent for search + username */
+    .field { position: relative; }
+    .field input {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      box-shadow: var(--shadow);
     }
-    .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .6; }
+    .field svg {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .6;
+    }
+
+    /* Layout for the fields */
+    .search { flex: 1 1 320px; min-width: 240px; }
+    .username { flex: 0 1 240px; min-width: 200px; }
+
     .view-btns { display: flex; gap: 8px; }
     .view-btns button {
       background: transparent; color: var(--muted); border: 1px solid var(--border);
@@ -111,6 +125,10 @@
       font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
       color: var(--muted);
     }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+    }
   </style>
 </head>
 <body>
@@ -126,12 +144,24 @@
     </p>
 
     <div class="toolbar" role="region" aria-label="Toolbar">
-      <div class="search">
+      <!-- Search -->
+      <div class="field search">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M21 21l-4.2-4.2M10.5 18a 7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         </svg>
+        <label class="sr-only" for="search">Search interfaces</label>
         <input id="search" type="search" placeholder="Search interfaces… (e.g., snowflake, salesforce)" aria-label="Search interfaces" />
       </div>
+
+      <!-- Username (NEW) -->
+      <div class="field username">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5 0-9 2.5-9 5.5V22h18v-2.5C21 16.5 17 14 12 14Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <label class="sr-only" for="username">Username parameter</label>
+        <input id="username" type="text" placeholder="Username (optional)" aria-label="Username parameter" />
+      </div>
+
       <div class="view-btns" role="group" aria-label="Toggle view">
         <button id="btnCards" class="active" type="button" title="Cards view">Cards</button>
         <button id="btnTable" type="button" title="Table view">Table</button>
@@ -173,7 +203,7 @@
     const interfaces = [
       {
         name: "Salesforce Mock",
-        href: "Salesforce_Mock.html",
+        href: "Salesforce_Contacts_Mock.html",
         icon: "SalesforceFavicon.png",
         desc: "Mock interface for Salesforce integration demo.",
         tags: ["crm","salesforce","demo","mock"]
@@ -192,11 +222,16 @@
     const tableEl = document.getElementById('table');
     const tbodyEl = tableEl.querySelector('tbody');
     const searchEl = document.getElementById('search');
+    const usernameEl = document.getElementById('username');
     const emptyEl  = document.getElementById('empty');
     const btnCards = document.getElementById('btnCards');
     const btnTable = document.getElementById('btnTable');
 
-    const esc = s => (s ?? '').toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    // Parameter name + storage key
+    const PARAM_NAME = 'username';
+    const STORAGE_KEY = 'ucpm.username';
+
+    const esc = s => (s ?? '').toString().replace(/[&<>\"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
     function matches(q, item) {
       if (!q) return true;
@@ -207,6 +242,24 @@
         (item.tags || []).join(' ').toLowerCase().includes(q) ||
         (item.href || '').toLowerCase().includes(q)
       );
+    }
+
+    // Safely append ?k=v or &k=v, preserving #hash
+    function withParam(base, key, value) {
+      if (!value) return base; // no change if username empty
+      const [url, hash = ''] = base.split('#');
+      const sep = url.includes('?') ? '&' : '?';
+      const full = `${url}${sep}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+      return hash ? `${full}#${hash}` : full;
+    }
+
+    // After (re)render, apply username param to all links that declare a data-base-href
+    function updateLinks() {
+      const val = usernameEl.value.trim();
+      document.querySelectorAll('a[data-base-href]').forEach(a => {
+        const base = a.getAttribute('data-base-href');
+        a.href = withParam(base, PARAM_NAME, val);
+      });
     }
 
     function renderList() {
@@ -222,8 +275,8 @@
           </div>
           <p>${esc(it.desc || "")}</p>
           <div class="actions">
-            <a class="btn" href="${esc(it.href)}">Open here</a>
-            <a class="btn secondary" href="${esc(it.href)}" target="_blank" rel="noopener">New tab</a>
+            <a class="btn" data-base-href="${esc(it.href)}" href="${esc(it.href)}">Open here</a>
+            <a class="btn secondary" data-base-href="${esc(it.href)}" href="${esc(it.href)}" target="_blank" rel="noopener">New tab</a>
           </div>
           <div class="tags" aria-hidden="true">
             ${(it.tags||[]).map(t => `#${esc(t)}`).join(' ')}
@@ -234,15 +287,18 @@
       // Table
       tbodyEl.innerHTML = filtered.map(it => `
         <tr>
-          <td><a class="open" href="${esc(it.href)}">Open here</a></td>
+          <td><a class="open" data-base-href="${esc(it.href)}" href="${esc(it.href)}">Open here</a></td>
           <td><strong>${esc(it.name)}</strong><div style="color:var(--muted);font-size:12px;">${esc(it.href)}</div></td>
           <td>${esc(it.desc || "")}</td>
           <td>${(it.tags||[]).map(esc).join(", ")}</td>
-          <td><a class="open" href="${esc(it.href)}" target="_blank" rel="noopener">New tab</a></td>
+          <td><a class="open" data-base-href="${esc(it.href)}" href="${esc(it.href)}" target="_blank" rel="noopener">New tab</a></td>
         </tr>
       `).join('');
 
       emptyEl.style.display = filtered.length ? 'none' : 'block';
+
+      // Apply username param to freshly created anchors
+      updateLinks();
     }
 
     function setView(mode) {
@@ -257,13 +313,36 @@
     btnTable.addEventListener('click', () => setView('table'));
 
     searchEl.addEventListener('input', renderList);
+
+    // Update links live when username changes (and persist)
+    usernameEl.addEventListener('input', () => {
+      localStorage.setItem(STORAGE_KEY, usernameEl.value);
+      updateLinks();
+    });
+
+    // Keyboard UX
     window.addEventListener('keydown', (e) => {
-      if (e.key === '/' && document.activeElement !== searchEl) { e.preventDefault(); searchEl.focus(); }
-      if (e.key === 'Enter' && document.activeElement === searchEl) {
+      // Focus search with slash
+      if (e.key === '/' && document.activeElement !== searchEl) {
+        e.preventDefault(); searchEl.focus();
+      }
+      // Enter opens first visible result (works when focus is on search or username)
+      const focusInSearchOrUser = (document.activeElement === searchEl || document.activeElement === usernameEl);
+      if (e.key === 'Enter' && focusInSearchOrUser) {
         const firstLink = document.querySelector('#cards a.btn, #table a.open');
         if (firstLink) firstLink.click();
       }
     });
+
+    // Prefill username from URL (?username=...) or localStorage
+    (function initUsername() {
+      try {
+        const usp = new URLSearchParams(location.search);
+        const fromQuery = usp.get(PARAM_NAME);
+        const fromStorage = localStorage.getItem(STORAGE_KEY);
+        usernameEl.value = (fromQuery ?? fromStorage ?? '').trim();
+      } catch { /* noop */ }
+    })();
 
     renderList();
     setView('cards');
