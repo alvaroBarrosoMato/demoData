@@ -1,0 +1,921 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Adobe Experience Platform – Profiles (Replica)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      /* AEP-like palette */
+      --aep-brand:#000;
+      --aep-blue:#1473e6;
+      --aep-blue-600:#0d66d0;
+      --aep-blue-50:#e6f0fd;
+      --aep-surface:#ffffff;
+      --aep-gray-950:#111;
+      --aep-gray-900:#1f1f1f;
+      --aep-gray-800:#2c2c2c;
+      --aep-gray-700:#3d3d3d;
+      --aep-gray-600:#5c5c5c;
+      --aep-gray-500:#757575;
+      --aep-gray-400:#9e9e9e;
+      --aep-gray-300:#c7c7c7;
+      --aep-gray-200:#e0e0e0;
+      --aep-gray-100:#f5f5f5;
+
+      --chip-bg:#f5f7fb;
+      --chip-border:#dce3f2;
+      --ok:#1ea672;
+      --warn:#b04c00;
+
+      --shadow:0 1px 2px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.06);
+      --radius:8px;
+      --focus:0 0 0 3px rgba(20,115,230,.25);
+    }
+    html,body{height:100%}
+    body{
+      margin:0; font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      color:var(--aep-gray-900); background:#fafafa;
+    }
+
+    /* ===== WHITE TOP BAR (centered search) ===== */
+    .topbar{
+      height:56px; background:#fff; color:var(--aep-brand);
+      display:grid; grid-template-columns: 280px 1fr 280px; align-items:center;
+      padding:0 16px; border-bottom:1px solid var(--aep-gray-200);
+    }
+    .brand{ display:flex; align-items:center; gap:12px; font-weight:700; font-size:15px; color:var(--aep-brand); }
+    .brand .logo-tile{
+      width:24px; height:24px; border-radius:4px; background:#e5322d; color:#fff;
+      display:grid; place-items:center; font-weight:800; font-size:15px;
+    }
+    .searchbar{ display:flex; justify-content:center; }
+    .search{
+      display:flex; align-items:center; gap:10px;
+      width:min(720px, 92%); background:#f5f5f7; border:1px solid var(--aep-gray-200);
+      padding:8px 12px; border-radius:22px;
+    }
+    .search input{ width:100%; border:0; outline:none; background:transparent; font-size:14px; }
+    .avatar-area{ display:flex; justify-content:flex-end; align-items:center; gap:12px; }
+    .avatar{ width:28px; height:28px; border-radius:50%; background:#1473e6; color:#fff; display:grid; place-items:center; font-weight:700; }
+
+    /* ===== BLUE ENV BAR ===== */
+    .envbar{
+      height:38px; background:var(--aep-blue); color:#fff; display:flex; align-items:center; gap:12px;
+      padding:0 16px; font-weight:600; border-bottom:1px solid rgba(0,0,0,.08);
+    }
+    .env-pill{
+      background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
+      padding:3px 10px; border-radius:12px; font-size:12px;
+    }
+
+    /* ===== APP SHELL ===== */
+    .shell{display:grid; grid-template-columns: 232px 1fr; min-height: calc(100% - 94px);} /* 56 + 38 */
+    .rail{ background:#fff; border-right:1px solid var(--aep-gray-200); padding:12px 8px; overflow:auto; }
+    .group{ margin:12px 6px }
+    .group h6{
+      margin:12px 10px 6px; color:var(--aep-gray-600); font-size:12px; letter-spacing:.4px; text-transform:uppercase;
+    }
+    .nav a{
+      display:flex; align-items:center; gap:10px; padding:9px 10px; margin:2px 0; border-radius:8px;
+      color:var(--aep-gray-800); text-decoration:none; font-size:14px;
+    }
+    .nav a:hover{background:#f6f8ff}
+    .nav a.active{background:#eef4ff; color:var(--aep-blue)}
+    .icon{ width:18px; height:18px; display:inline-block; color:currentColor; }
+
+    .content{ padding:20px 24px; overflow:auto; }
+    .page-title{ font-size:22px; font-weight:700; margin:4px 0 10px }
+    .tabs{ display:flex; gap:18px; margin-bottom:14px }
+    .tab{ color:var(--aep-gray-700); font-weight:600; cursor:pointer }
+    .tab.active{ color:var(--aep-blue); position:relative }
+    .tab.active::after{ content:""; position:absolute; left:0; bottom:-8px; width:100%; height:2px; background:var(--aep-blue) }
+
+    /* ===== CARD & CONTROLS ===== */
+    .card{ background:#fff; border:1px solid var(--aep-gray-200); border-radius:8px; box-shadow:var(--shadow) }
+    .card .card-body{ padding:16px 16px 10px }
+    .info{ display:inline-flex; align-items:center; gap:6px; color:var(--aep-gray-700); font-size:12px }
+    .info .i{ width:16px; height:16px; border-radius:50%; background:#edf3ff; color:var(--aep-blue); display:grid; place-items:center; font-weight:800 }
+
+    .controls{
+      display:grid; gap:10px; align-items:center;
+      grid-template-columns: 320px 260px 1fr auto auto; /* merge, namespace, filter, view, clear */
+      margin-top:8px;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:20px; background:var(--chip-bg);
+      border:1px solid var(--chip-border); color:var(--aep-gray-800); position:relative;
+    }
+    .chip .label{ font-weight:600 }
+    .chip .value{ background:#fff; padding:4px 8px; border-radius:12px; border:1px solid var(--chip-border) }
+    .chip .x{ width:18px; height:18px; border-radius:50%; display:grid; place-items:center; cursor:pointer; color:var(--aep-gray-600) }
+    .chip .x:hover{ background:#efefef }
+    .chip.select{ cursor:pointer }
+    .chip.select:hover{ box-shadow:var(--focus) }
+
+    .menu{
+      position:absolute; top:calc(100% + 6px); left:0; background:#fff; border:1px solid var(--aep-gray-200); border-radius:8px; box-shadow:var(--shadow);
+      padding:6px 0; z-index:20; min-width:260px; display:none;
+    }
+    .menu.open{ display:block }
+    .menu a{ display:block; padding:8px 12px; text-decoration:none; color:var(--aep-gray-800); font-size:14px }
+    .menu a:hover{ background:#f6f8ff }
+    .menu a.active::after{ content:"✓"; float:right; color:var(--ok); font-weight:700 }
+
+    .filter{
+      display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--aep-gray-300);
+      border-radius:20px; padding:8px 12px;
+    }
+    .filter:focus-within{ box-shadow:var(--focus) }
+    .filter input{ border:0; outline:none; width:100%; font-size:14px }
+
+    .btn{ border:0; border-radius:22px; padding:8px 16px; font-weight:700; cursor:pointer }
+    .btn.primary{ background:var(--aep-blue); color:#fff }
+    .btn.primary:hover{ background:var(--aep-blue-600) }
+    .btn.ghost{ background:transparent; color:var(--aep-gray-900) }
+    .btn.ghost:hover{ background:#f2f2f2 }
+
+    .rbar{ display:flex; gap:10px; align-items:center; justify-content:flex-end; margin:8px 0 0 }
+    .toggle{ display:inline-flex; align-items:center; gap:10px; padding:8px 10px; background:#fff; border:1px solid var(--aep-gray-300); border-radius:20px }
+    .toggle input{ accent-color:var(--aep-blue) }
+
+    /* ===== GRID ===== */
+    .grid-wrapper{ border-top:1px solid var(--aep-gray-200); margin-top:10px }
+    table{ width:100%; border-collapse:separate; border-spacing:0 }
+    thead{ background:#fafbff }
+    thead th{
+      font-size:12px; letter-spacing:.3px; text-transform:uppercase; color:var(--aep-gray-600);
+      text-align:left; padding:10px 12px; border-bottom:1px solid var(--aep-gray-200)
+    }
+    tbody tr{ background:#fff }
+    tbody tr:hover{ background:#eef4ff }
+    tbody td{ padding:12px; border-bottom:1px solid var(--aep-gray-200); vertical-align:top }
+
+    /* Purpose pills */
+    .pills{ display:flex; flex-wrap:wrap; gap:6px }
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      background:#f5f7fb; border:1px solid #dce3f2; color:#2c2c2c;
+      padding:4px 8px; border-radius:14px; font-size:12px; line-height:1;
+    }
+    .pill .icons{ opacity:.85 }
+    .pill:hover{ box-shadow:var(--focus) }
+
+    .loading{ display:flex; align-items:center; gap:10px; padding:12px }
+    .spinner{ width:22px; height:22px; border:3px solid #cfd8ff; border-top-color:var(--aep-blue); border-radius:50%; animation:spin 1s linear infinite }
+    @keyframes spin{ to{ transform:rotate(360deg) } }
+    .empty, .error{ padding:24px; color:var(--aep-gray-700) }
+
+    /* ===== Drawer (Adobe card) ===== */
+    .backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.45); opacity:0; pointer-events:none; transition:opacity .18s ease;
+    }
+    .backdrop.open{ opacity:1; pointer-events:auto }
+    .drawer{
+      position:fixed; right:-920px; top:0; height:100%; width:min(920px, 95vw);
+      background:#fff; border-left:4px solid var(--aep-blue); box-shadow: -12px 0 28px rgba(0,0,0,.18);
+      transition:right .22s ease; display:flex; flex-direction:column;
+    }
+    .drawer.open{ right:0 }
+    .drawer-head{
+      padding:14px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--aep-gray-200);
+    }
+    .identity{ display:flex; align-items:center; gap:12px; }
+    .avatar{
+      width:44px; height:44px; border-radius:8px; background:#e6f0fd; color:#0d66d0; font-weight:800; display:grid; place-items:center
+    }
+    .drawer-body{ padding:16px; overflow:auto }
+    .kv{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px }
+    .kv .k{ color:var(--aep-gray-600); width:150px }
+    .section{ margin-top:14px }
+    .section h3{ margin:0 0 10px 0; color:#111; font-size:14px; font-weight:800 }
+    .close-btn, .ghost-btn{
+      border:1px solid #cfcfcf; background:#fff; color:#222; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:13px
+    }
+    .ghost-btn:hover, .close-btn:hover{ background:#f7f7f7 }
+    .empty-row{ color:#888; font-style:italic }
+  </style>
+</head>
+<body>
+  <!-- ===== WHITE TOP BAR with centered search ===== -->
+  <header class="topbar" role="banner" aria-label="App header">
+    <div class="brand">
+      <div class="logo-tile" aria-hidden="true">A</div>
+      Adobe Experience Platform
+    </div>
+    <div class="searchbar">
+      <div class="search" role="search" title="Search Experience Cloud (⌘+/)">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 1 1 5.293 13.707l4 4a1 1 0 0 1-1.414 1.414l-4-4A8 8 0 0 1 10 2m0 2a6 6 0 1 0 0 12A6 6 0 0 0 10 4z"/></svg>
+        <input id="globalSearch" type="search" placeholder="Search Experience Cloud (⌘+/)" aria-label="Search" />
+      </div>
+    </div>
+    <div class="avatar-area">
+      <div class="avatar" title="Signed in">AB</div>
+    </div>
+  </header>
+
+  <!-- ===== BLUE ENVIRONMENT BAR ===== -->
+  <div class="envbar" role="note" aria-label="Environment">
+    <span class="env-pill" title="Current organization">PRODUCTION</span>
+    <span class="env-pill" title="Datacenter / instance">Prod (VA7)</span>
+  </div>
+
+  <!-- ===== SHELL ===== -->
+  <div class="shell">
+    <!-- LEFT RAIL -->
+    <aside class="rail" aria-label="Primary Navigation">
+      <nav class="nav">
+        <div class="group">
+          <a href="#">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10l9-7z"/></svg>
+            Home
+          </a>
+        </div>
+
+        <div class="group">
+          <h6>Workflows</h6>
+          <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 4h16v4H4zM4 10h10v4H4zM4 16h16v4H4z"/></svg> Sources</a>
+          <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 11h12l-3-3 1.4-1.4L19.8 12l-6.4 5.4L13 16l3-3H3z"/></svg> Destinations</a>
+        </div>
+
+        <div class="group">
+          <h6>Customer</h6>
+          <a class="active" href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-5 0-9 2.5-9 5v1h18v-1c0-2.8-3.6-5-9-5z"/></svg> Profiles</a>
+          <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg> Segments</a>
+          <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5z"/></svg> Identities</a>
+        </div>
+
+        <div class="group">
+          <h6>Privacy</h6>
+          <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V7h3.5L14 3.5zM8 11h8v2H8zm0 4h8v2H8z"/></svg> Policies</a>
+          <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 3h16v4H4zM4 9h16v12H4zM7 12h10v2H7zm0 4h10v2H7z"/></svg> Requests</a>
+        </div>
+
+        <div class="group">
+          <h6>Data Science</h6>
+          <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h18v2H3zm0 4h18v2H3zm0 4h18v2H3z"/></svg> Services</a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="content">
+      <div class="page-title">Profiles</div>
+      <div class="tabs" role="tablist" aria-label="Profiles Tabs">
+        <div class="tab" role="tab" aria-selected="false" tabindex="0">Overview</div>
+        <div class="tab active" role="tab" aria-selected="true" tabindex="0">Browse</div>
+        <div class="tab" role="tab" aria-selected="false" tabindex="0">Merge Policies</div>
+        <div class="tab" role="tab" aria-selected="false" tabindex="0">Union Schema</div>
+      </div>
+
+      <div class="card" aria-labelledby="browse-title">
+        <div class="card-body">
+          <div id="browse-title" class="info" style="margin-bottom:6px">
+            <div class="i" title="What is this?">i</div>
+            <span>Browse profiles by merge policy and filter by an identity value (optional).</span>
+          </div>
+
+          <!-- Controls -->
+          <div class="controls" aria-label="Filters">
+            <!-- Merge policy chip (cosmetic) -->
+            <div class="chip" title="Current merge policy">
+              <span class="label">Merge policy</span>
+              <span class="value">Default Timebased</span>
+              <span class="x" role="button" aria-label="Remove merge policy chip" title="Remove">✕</span>
+            </div>
+
+            <!-- Identity namespace chip -->
+            <div class="chip select" id="nsChip" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false" title="Select identity namespace">
+              <span class="label">Identity namespace</span>
+              <span class="value" id="nsValue">Consent</span>
+              <span class="x" id="nsClear" role="button" aria-label="Clear namespace" title="Clear">✕</span>
+              <div class="menu" id="nsMenu" role="listbox" aria-label="Identity namespaces"></div>
+            </div>
+
+            <!-- Filter -->
+            <label class="filter" title="Type to filter results by the selected identity namespace">
+              <span style="color:#888;font-size:12px">Filter</span>
+              <input id="filterInput" type="search" placeholder="Filter profiles (by identity value…)" aria-label="Filter profiles by identity value" />
+            </label>
+
+            <!-- Primary/Secondary -->
+            <button class="btn primary" id="viewBtn" aria-label="Apply filters and load">View</button>
+            <button class="btn ghost" id="clearBtn" aria-label="Clear filters">Clear</button>
+          </div>
+
+          <!-- Right helper controls -->
+          <div class="rbar">
+            <label class="toggle" title="Use local sample for testing without calling the API">
+              <input id="mockToggle" type="checkbox" />
+              Use sample data
+            </label>
+            <button class="btn ghost" id="refreshBtn" title="Refresh" aria-label="Refresh">⟳ Refresh</button>
+          </div>
+        </div>
+
+        <!-- Grid -->
+        <div class="grid-wrapper" id="gridArea">
+          <div class="loading" id="loading"><div class="spinner" aria-hidden="true"></div> Loading…</div>
+          <div class="error" id="error" hidden>Could not load profiles. Check network/CORS or try “Use sample data”.</div>
+          <div class="empty" id="empty" hidden>No profiles match your filters.</div>
+
+          <table role="table" aria-label="Profiles list" id="profilesTable" style="display:none;">
+            <thead>
+              <tr>
+                <!-- Name first (click to open profile card) -->
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Country</th>
+                <th>Purposes</th>
+                <th>Updated At</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="color:#757575; font-size:12px; margin-top:10px">
+        Hover the purpose chips to see personalized preference summaries and consent status.
+      </div>
+    </main>
+  </div>
+
+  <!-- Drawer -->
+  <div id="backdrop" class="backdrop" aria-hidden="true"></div>
+  <div id="profileDrawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+    <div class="drawer-head">
+      <div class="identity">
+        <div id="profileAvatar" class="avatar">?</div>
+        <div>
+          <div id="profileTitle" style="font-weight:800; font-size:18px;">Profile</div>
+          <div id="profileSubtitle" class="meta">—</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button id="btnCopyEmail" class="ghost-btn">Copy Email</button>
+        <button id="btnCloseDrawer" class="close-btn">Close ✕</button>
+      </div>
+    </div>
+    <div class="drawer-body">
+      <div class="section">
+        <h3>Details</h3>
+        <div class="kv"><div class="k">Full Name</div><div id="d_name">—</div></div>
+        <div class="kv"><div class="k">Email</div><div id="d_email">—</div></div>
+        <div class="kv"><div class="k">City</div><div id="d_city">—</div></div>
+        <div class="kv"><div class="k">Country</div><div id="d_country">—</div></div>
+        <div class="kv"><div class="k">Phone</div><div id="d_phone">—</div></div>
+        <div class="kv"><div class="k">Total Consents</div><div id="d_count">0</div></div>
+        <div class="kv"><div class="k">Last Updated</div><div id="d_updated">—</div></div>
+      </div>
+
+      <div class="section">
+        <h3>Consents</h3>
+        <div class="table-wrap">
+          <table role="grid" aria-label="Consents">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Purpose</th>
+                <th>Type</th>
+                <th>Preferences</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody id="consentsBody">
+              <tr><td colspan="5" class="empty-row">No consents for this profile.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =========================
+   Configuration
+========================= */
+const API_URL =
+  "https://default9d1d17d8372b4b23a9fc1e5d895c89.a1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a3eaffa116ac4c0cb3d7d5dc86724a8f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5X3nvYDfsc1yBZYsz6SEYNA5ZfmZf4wODLLXHMyaO4";
+
+const NAMESPACES = [
+  { key: "Consent", hint: "Default. Filters by SUBJECT_ID (e.g., consent subject)" },
+  { key: "Email",   hint: "Filters by EMAIL (fallback SUBJECT_ID if it looks like email)" },
+  { key: "SMS",     hint: "Filters SUBJECT_ID if it looks like a phone number" },
+  { key: "CRMID",   hint: "Filters by ItemInternalId" },
+  { key: "Phone",   hint: "Filters SUBJECT_ID for phone-like values" },
+];
+
+/* =========================
+   Elements
+========================= */
+const nsChip = document.getElementById('nsChip');
+const nsMenu = document.getElementById('nsMenu');
+const nsValueEl = document.getElementById('nsValue');
+const nsClear = document.getElementById('nsClear');
+const filterInput = document.getElementById('filterInput');
+const viewBtn = document.getElementById('viewBtn');
+const clearBtn = document.getElementById('clearBtn');
+const refreshBtn = document.getElementById('refreshBtn');
+const mockToggle = document.getElementById('mockToggle');
+const tbody = document.getElementById('tbody');
+const loading = document.getElementById('loading');
+const errorBox = document.getElementById('error');
+const emptyBox = document.getElementById('empty');
+const tableEl = document.getElementById('profilesTable');
+
+/* Drawer elements */
+const drawer = document.getElementById("profileDrawer");
+const backdrop = document.getElementById("backdrop");
+const btnCloseDrawer = document.getElementById("btnCloseDrawer");
+const btnCopyEmail = document.getElementById("btnCopyEmail");
+
+/* =========================
+   State
+========================= */
+let state = {
+  namespace: "Consent",
+  allRaw: [],
+  baseRaw: [],       // username-filtered
+  profiles: [],      // grouped
+  filteredProfiles: []
+};
+
+/* =========================
+   Helpers
+========================= */
+const ENT = { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' };
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, ch => ENT[ch]); }
+function looksLikeEmail(s){ return typeof s === 'string' && s.includes('@'); }
+function looksLikePhone(s){ return typeof s === 'string' && !s.includes('@') && /[\d+][\d\s\-()]{4,}/.test(s); }
+function profileKey(r){ return r.SUBJECT_ID || r.ItemInternalId || ""; }
+function maxDate(a,b){ return new Date(a) > new Date(b) ? a : b; }
+function fmtDate(iso){
+  try{
+    const d = new Date(iso);
+    if (String(d) === "Invalid Date") return iso || "";
+    return d.toLocaleString([], { year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+  }catch{ return iso || ""; }
+}
+function parsePreferences(prefStr){
+  if (!prefStr || prefStr === "[]") return [];
+  try{ return JSON.parse(prefStr); }
+  catch{ return []; }
+}
+function summarizePreferences(pref){
+  const parts = [];
+  (pref||[]).forEach(group=>{
+    const on = (group.options || []).filter(o => (o.value === true || o.value === "true")).map(o => o.name);
+    if (on.length) parts.push(`${group.name}: ${on.join(", ")}`);
+  });
+  return parts.join(" · ");
+}
+function channelIcons(pref){
+  let email=false, sms=false, wa=false;
+  (pref||[]).forEach(g=>{
+    if ((g.name||"").toLowerCase() === "channel"){
+      (g.options||[]).forEach(o=>{
+        const name=(o.name||"").toLowerCase();
+        const val=(o.value===true || o.value==="true");
+        if (val){
+          if (name==="email") email=true;
+          if (name==="sms") sms=true;
+          if (name==="whatsapp") wa=true;
+        }
+      });
+    }
+  });
+  const icons=[];
+  if (email) icons.push("📧");
+  if (wa) icons.push("💬");
+  if (sms) icons.push("📱");
+  return icons.join(" ");
+}
+function getUsernameFromUrl(){
+  const params = new URLSearchParams(location.search);
+  return (params.get("username") || "").trim();
+}
+
+/* =========================
+   Namespace menu
+========================= */
+function renderNamespaceMenu(){
+  nsMenu.innerHTML = '';
+  NAMESPACES.forEach(ns => {
+    const a = document.createElement('a');
+    a.href = "#";
+    a.role = "option";
+    a.textContent = ns.key + " — " + ns.hint;
+    if (ns.key === state.namespace) a.classList.add('active');
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      state.namespace = ns.key;
+      nsValueEl.textContent = ns.key;
+      nsMenu.classList.remove('open');
+      nsChip.setAttribute('aria-expanded','false');
+      applyFilterAndGroup();
+    });
+    nsMenu.appendChild(a);
+  });
+}
+nsChip.addEventListener('click', () => {
+  nsMenu.classList.toggle('open');
+  nsChip.setAttribute('aria-expanded', String(nsMenu.classList.contains('open')));
+});
+document.addEventListener('click', (e)=>{
+  if (!nsChip.contains(e.target)) {
+    nsMenu.classList.remove('open');
+    nsChip.setAttribute('aria-expanded','false');
+  }
+});
+nsClear.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  state.namespace = "Consent";
+  nsValueEl.textContent = "Consent";
+  renderNamespaceMenu();
+  applyFilterAndGroup();
+});
+
+/* =========================
+   Data
+========================= */
+async function fetchData(){
+  if (mockToggle.checked){
+    // Sample data
+    return [
+      {
+        "@odata.etag": "",
+        "ItemInternalId": "7faba61a-d41c-4119-a8f2-b67c50f977cc",
+        "SUBJECT_ID": "pfernandez@gmail.com",
+        "EMAIL": "pfernandez@gmail.com",
+        "FirstName": "Pedro",
+        "LastName": "Fernandez",
+        "Phone": "+34 666777888",
+        "Country": "Spain",
+        "City": "Madrid",
+        "USERNAME_EMAIL": "pfernandez",
+        "PURPOSE_NAME": "Share Data with 3rd Parties (TicketBoss)",
+        "CONSENT_TYPE": "ACTIVE",
+        "PREFERENCES": "[]",
+        "UPDATED_AT": "2026-01-20T10:28:35Z"
+      },
+      {
+        "@odata.etag": "",
+        "ItemInternalId": "668063be-7b5b-4b85-bd8f-ae595f0f8f40",
+        "SUBJECT_ID": "pfernandez@gmail.com",
+        "EMAIL": "pfernandez@gmail.com",
+        "FirstName": "Pedro",
+        "LastName": "Fernandez",
+        "Phone": "+34 666777888",
+        "Country": "Spain",
+        "City": "Madrid",
+        "USERNAME_EMAIL": "pfernandez",
+        "PURPOSE_NAME": "Email Marketing (BossGolf)",
+        "CONSENT_TYPE": "ACTIVE",
+        "PREFERENCES": "[{\"name\":\"Cadence\",\"options\":[{\"name\":\"Weekly\",\"value\":\"false\"},{\"name\":\"Monthly\",\"value\":\"true\"}]},{\"name\":\"Channel\",\"options\":[{\"name\":\"Email\",\"value\":\"true\"},{\"name\":\"Whatsapp\",\"value\":\"true\"},{\"name\":\"SMS\",\"value\":\"false\"}]}]",
+        "UPDATED_AT": "2026-01-20T10:28:36Z"
+      },
+      {
+        "@odata.etag": "",
+        "ItemInternalId": "f2bb63f5-2d2b-4f2e-8469-1a7c22c0aa11",
+        "SUBJECT_ID": "jsmith@acme.com",
+        "EMAIL": "jsmith@acme.com",
+        "FirstName": "Jason",
+        "LastName": "Smith",
+        "Phone": "+1 (415) 555-0199",
+        "Country": "USA",
+        "City": "San Francisco",
+        "USERNAME_EMAIL": "jsmith",
+        "PURPOSE_NAME": "Product Updates",
+        "CONSENT_TYPE": "ACTIVE",
+        "PREFERENCES": "[]",
+        "UPDATED_AT": "2026-01-18T08:12:00Z"
+      }
+    ];
+  }
+  const res = await fetch(API_URL, { method:"GET" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  if (!Array.isArray(json)) throw new Error("Unexpected API response; expected an array of profiles.");
+  return json;
+}
+function showLoading(on){
+  loading.hidden = !on;
+  // If showing loading, hide other states and table
+  if (on){
+    errorBox.hidden = true;
+    emptyBox.hidden = true;
+    tableEl.style.display = "none";
+  }
+}
+function showError(msg){
+  errorBox.hidden = false;
+  errorBox.textContent = msg || "Could not load profiles.";
+}
+
+/* =========================
+   Filter target set (by namespace + query)
+========================= */
+function matchingProfileIdSet(raw, namespace, queryLower){
+  if (!queryLower) {
+    return new Set(raw.map(r => profileKey(r)).filter(Boolean));
+  }
+  const ids = new Set();
+  raw.forEach(r=>{
+    const subj = (r.SUBJECT_ID || "");
+    const email = (r.EMAIL || "");
+    const crmid = (r.ItemInternalId || "");
+    switch(namespace){
+      case "Consent":
+        if (subj.toLowerCase().includes(queryLower)) ids.add(profileKey(r));
+        break;
+      case "Email":
+        if (email.toLowerCase().includes(queryLower) || (looksLikeEmail(subj) && subj.toLowerCase().includes(queryLower))) ids.add(profileKey(r));
+        break;
+      case "SMS":
+      case "Phone":
+        if (looksLikePhone(subj) && subj.toLowerCase().includes(queryLower)) ids.add(profileKey(r));
+        break;
+      case "CRMID":
+        if (crmid.toLowerCase().includes(queryLower)) ids.add(profileKey(r));
+        break;
+      default:
+        if (JSON.stringify(r).toLowerCase().includes(queryLower)) ids.add(profileKey(r));
+    }
+  });
+  return ids;
+}
+
+/* =========================
+   Grouping with purpose pills
+========================= */
+function groupByProfile(includeIds, raw){
+  const bucket = new Map();
+  raw.forEach(r=>{
+    const key = profileKey(r);
+    if (!key || !includeIds.has(key)) return;
+
+    if (!bucket.has(key)) {
+      const email = r.EMAIL || (looksLikeEmail(r.SUBJECT_ID) ? r.SUBJECT_ID : "");
+      bucket.set(key, {
+        Email: email || "",
+        Name: [r.FirstName, r.LastName].filter(Boolean).join(" ").trim(),
+        Phone: r.Phone || "",
+        Country: r.Country || "",
+        City: r.City || "",
+        UpdatedAtISO: r.UPDATED_AT || "",
+        purposeMeta: new Map()
+      });
+    }
+    const p = bucket.get(key);
+
+    // Keep first non-empty values
+    if (!p.Email && (r.EMAIL || looksLikeEmail(r.SUBJECT_ID))) p.Email = r.EMAIL || r.SUBJECT_ID;
+    if (!p.Name){
+      const n = [r.FirstName, r.LastName].filter(Boolean).join(" ").trim();
+      if (n) p.Name = n;
+    }
+    if (!p.Phone && r.Phone) p.Phone = r.Phone;
+    if (!p.Country && r.Country) p.Country = r.Country;
+    if (!p.City && r.City) p.City = r.City;
+
+    // UpdatedAt = most recent
+    if (r.UPDATED_AT) p.UpdatedAtISO = maxDate(p.UpdatedAtISO, r.UPDATED_AT);
+
+    // Purpose meta
+    const purposeName = r.PURPOSE_NAME || "";
+    if (purposeName){
+      if (!p.purposeMeta.has(purposeName)){
+        p.purposeMeta.set(purposeName, {
+          name: purposeName,
+          summaries: new Set(),
+          consents: new Set(),
+          icons: new Set()
+        });
+      }
+      const prefArr = parsePreferences(r.PREFERENCES);
+      const summary = summarizePreferences(prefArr);
+      const iconStr = channelIcons(prefArr);
+
+      const meta = p.purposeMeta.get(purposeName);
+      if (summary) meta.summaries.add(summary);
+      if (iconStr) iconStr.split(" ").forEach(ic => ic && meta.icons.add(ic));
+      if (r.CONSENT_TYPE) meta.consents.add(String(r.CONSENT_TYPE).toUpperCase());
+    }
+  });
+
+  // Finalize
+  const list = Array.from(bucket.values()).map(p => {
+    const purposes = Array.from(p.purposeMeta.values()).map(meta => ({
+      name: meta.name,
+      summary: Array.from(meta.summaries).join(" | "),
+      icons: Array.from(meta.icons).join(" "),
+      consent: Array.from(meta.consents).join(", ")
+    }));
+    return {
+      Email: p.Email || "—",
+      Name: p.Name || "—",
+      Phone: p.Phone || "—",
+      Country: p.Country || "—",
+      City: p.City || "—",
+      purposes,
+      UpdatedAt: fmtDate(p.UpdatedAtISO || "")
+    };
+  });
+
+  // Sort newest first
+  list.sort((a,b)=> new Date(b.UpdatedAt) - new Date(a.UpdatedAt));
+  return list;
+}
+
+function purposePillsHTML(items){
+  if (!items || !items.length) return "—";
+  return `<div class="pills">` + items.map(it => {
+    const titleParts = [];
+    if (it.consent) titleParts.push(`CONSENT: ${it.consent}`);
+    if (it.summary) titleParts.push(it.summary);
+    const title = titleParts.join("\n");
+    const icons = it.icons ? `<span class="icons">${esc(it.icons)}</span> ` : "";
+    return `<span class="pill" title="${esc(title)}">${icons}${esc(it.name)}</span>`;
+  }).join('') + `</div>`;
+}
+
+/* =========================
+   Rendering
+========================= */
+function renderTable(rows){
+  if (!rows.length){
+    tbody.innerHTML = '';
+    tableEl.style.display = "none";
+    emptyBox.hidden = false;
+    return;
+  }
+  emptyBox.hidden = true;
+  tableEl.style.display = "table";
+
+  tbody.innerHTML = rows.map(p => `
+    <tr>
+      <td>${p.Email ? `<a href="#" class="link profile-link" data-email="${esc(p.Email)}">${esc(p.Name)}</a>` : esc(p.Name)}</td>
+      <td>${p.Email ? esc(p.Email) : "—"}</td>
+      <td>${esc(p.Phone)}</td>
+      <td>${esc(p.Country)}</td>
+      <td>${purposePillsHTML(p.purposes)}</td>
+      <td>${p.UpdatedAt || "—"}</td>
+    </tr>
+  `).join('');
+}
+
+function applyFilterAndGroup(){
+  const q = (filterInput.value || "").trim().toLowerCase();
+  const ids = matchingProfileIdSet(state.baseRaw, state.namespace, q);
+  state.profiles = groupByProfile(ids, state.baseRaw);
+  state.filteredProfiles = state.profiles.slice();
+  renderTable(state.filteredProfiles);
+}
+
+/* =========================
+   Drawer (profile)
+========================= */
+function initialsFromEmail(email){
+  const s = (email||"").trim();
+  const ch = s.match(/[a-zA-Z]/)?.[0] || s.charAt(0) || "?";
+  return ch.toUpperCase();
+}
+function openProfile(email){
+  const emailLc = (email||"").toLowerCase();
+  const items = state.baseRaw.filter(r => ((r.EMAIL || r.SUBJECT_ID || "")+"").toLowerCase() === emailLc);
+
+  const rep = items[0] || {};
+  const fullName = `${(rep.FirstName||"").trim()} ${(rep.LastName||"").trim()}`.trim();
+  const maxUpdated = items.reduce((acc,it)=>{
+    const t = Date.parse(it.UPDATED_AT || "");
+    return isNaN(t) ? acc : Math.max(acc, t);
+  }, 0);
+
+  document.getElementById("profileAvatar").textContent = initialsFromEmail(email);
+  document.getElementById("profileTitle").textContent = fullName || "Profile";
+  document.getElementById("profileSubtitle").textContent = email || "—";
+
+  document.getElementById("d_name").textContent = fullName || "—";
+  document.getElementById("d_email").textContent = email || "—";
+  document.getElementById("d_city").textContent = rep.City || "—";
+  document.getElementById("d_country").textContent = rep.Country || "—";
+  document.getElementById("d_phone").textContent = rep.Phone || "—";
+  document.getElementById("d_count").textContent = String(items.length);
+  document.getElementById("d_updated").textContent = maxUpdated ? fmtDate(new Date(maxUpdated).toISOString()) : "—";
+
+  const body = document.getElementById("consentsBody");
+  body.innerHTML = "";
+  if(items.length === 0){
+    body.innerHTML = '<tr><td class="empty-row" colspan="5">No consents for this profile.</td></tr>';
+  }else{
+    items.forEach(it=>{
+      const id = it.ItemInternalId || it.ID || it.Id || it.id || "";
+      const name = it.PURPOSE_NAME || "";
+      const type = (it.CONSENT_TYPE || "").toUpperCase();
+      const prefs = parsePreferences(it.PREFERENCES || "[]");
+      const updated = fmtDate(it.UPDATED_AT);
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${esc(id)}</td>
+        <td>${esc(name)}</td>
+        <td>${esc(type)}</td>
+        <td>${prefs.length ? '<div class="pills">' + prefs.map(p=>'<span class="pill">'+esc(p.name || String(p))+'</span>').join('') + '</div>' : '—'}</td>
+        <td>${esc(updated) || "—"}</td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  // Open
+  backdrop.classList.add("open");
+  drawer.classList.add("open");
+  drawer.setAttribute("aria-hidden","false");
+
+  // Update hash
+  location.hash = "profile=" + encodeURIComponent(email || "");
+}
+function closeProfile(){
+  drawer.classList.remove("open");
+  backdrop.classList.remove("open");
+  drawer.setAttribute("aria-hidden","true");
+  if(location.hash.startsWith("#profile=")){
+    history.replaceState(null, "", location.pathname + location.search);
+  }
+}
+backdrop.addEventListener("click", closeProfile);
+btnCloseDrawer.addEventListener("click", closeProfile);
+document.addEventListener("keydown", (e)=>{ if(e.key === "Escape") closeProfile(); });
+btnCopyEmail.addEventListener("click", ()=>{
+  const val = document.getElementById("d_email").textContent || "";
+  if(navigator.clipboard && val) navigator.clipboard.writeText(val);
+});
+
+/* =========================
+   Load (with username filter) + render
+========================= */
+async function loadAndRender(){
+  showLoading(true);
+  try{
+    const raw = await fetchData();
+
+    // Username prefilter (?username=...) on USERNAME_EMAIL (contains, case-insensitive)
+    const username = getUsernameFromUrl().toLowerCase();
+    state.allRaw = raw;
+    state.baseRaw = username
+      ? state.allRaw.filter(r => String(r.USERNAME_EMAIL || "").toLowerCase().includes(username))
+      : state.allRaw.slice();
+
+    applyFilterAndGroup();
+
+    // SUCCESS: hide loading, show table
+    showLoading(false);
+    tableEl.style.display = "table";
+
+    // Deep link (#profile=email)
+    const hash = decodeURIComponent(location.hash || "").trim();
+    const m = hash.match(/^#profile=(.+)$/i);
+    if(m && m[1]) openProfile(m[1]);
+  }catch(err){
+    console.error(err);
+    showError("Could not load profiles. " + (err?.message || ""));
+  }finally{
+    // Ensure loading hides even if something goes wrong after fetch/render
+    if (!loading.hidden) loading.hidden = true;
+  }
+}
+
+/* =========================
+   Events
+========================= */
+function onNameClickDelegate(e){
+  const a = e.target.closest("a.profile-link");
+  if (a){
+    e.preventDefault();
+    const email = a.getAttribute("data-email") || "";
+    if (email) openProfile(email);
+  }
+}
+tbody.addEventListener("click", onNameClickDelegate);
+
+viewBtn.addEventListener('click', loadAndRender);
+refreshBtn.addEventListener('click', loadAndRender);
+clearBtn.addEventListener('click', ()=>{
+  filterInput.value = "";
+  applyFilterAndGroup();
+});
+mockToggle.addEventListener('change', loadAndRender);
+filterInput.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') loadAndRender(); });
+
+/* Init */
+(function init(){
+  nsValueEl.textContent = state.namespace;
+  renderNamespaceMenu();
+  loadAndRender();
+})();
+</script>
+</body>
+</html>
