@@ -29,6 +29,14 @@
       --shadow:0 1px 2px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.06);
       --radius:8px;
       --focus:0 0 0 3px rgba(20,115,230,.25);
+
+      /* green/red states */
+      --ok-bg:#e6f4ea;
+      --ok-bd:#2ea365;
+      --ok-tx:#0f6b3a;
+      --no-bg:#fde8e7;
+      --no-bd:#d93025;
+      --no-tx:#8b1a18;
     }
     html,body{height:100%}
     body{
@@ -43,10 +51,8 @@
       padding:0 16px; border-bottom:1px solid var(--aep-gray-200);
     }
     .brand{ display:flex; align-items:center; gap:12px; font-weight:700; font-size:15px; color:var(--aep-brand); }
-    .brand .logo-tile{
-      width:24px; height:24px; border-radius:4px; background:#e5322d; color:#fff;
-      display:grid; place-items:center; font-weight:800; font-size:15px;
-    }
+    .brand .logo{ height:24px; width:auto; display:block; }
+
     .searchbar{ display:flex; justify-content:center; }
     .search{
       display:flex; align-items:center; gap:10px;
@@ -154,12 +160,24 @@
     .pill .icons{ opacity:.85 }
     .pill:hover{ box-shadow:var(--focus) }
 
+    /* Brand-aligned profile name link */
+    .profile-link{
+      color: var(--aep-blue-600);
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 4px;
+      padding: 2px 4px;
+    }
+    .profile-link:hover{ background: var(--aep-blue-50); text-decoration: underline; }
+    .profile-link:focus-visible{ outline: none; box-shadow: var(--focus); }
+    .profile-link:active{ color: var(--aep-blue); }
+
     .loading{ display:flex; align-items:center; gap:10px; padding:12px }
     .spinner{ width:22px; height:22px; border:3px solid #cfd8ff; border-top-color:#1473e6; border-radius:50%; animation:spin 1s linear infinite }
     @keyframes spin{ to{ transform:rotate(360deg) } }
     .empty, .error{ padding:24px; color:#5c5c5c }
 
-    /* ===== Drawer (Adobe card) ===== */
+    /* ===== Drawer (Adobe-like card) ===== */
     .backdrop{
       position:fixed; inset:0; background:rgba(0,0,0,.45); opacity:0; pointer-events:none; transition:opacity .18s ease;
     }
@@ -178,22 +196,50 @@
       width:44px; height:44px; border-radius:8px; background:#e6f0fd; color:#0d66d0; font-weight:800; display:grid; place-items:center
     }
     .drawer-body{ padding:16px; overflow:auto }
-    .kv{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px }
-    .kv .k{ color:#5c5c5c; width:150px }
     .section{ margin-top:14px }
     .section h3{ margin:0 0 10px 0; color:#111; font-size:14px; font-weight:800 }
+
+    /* Attributes band (top of card) */
+    .attrs{
+      display:grid; grid-template-columns: repeat(3, minmax(160px,1fr)); gap:10px;
+      background:#fafbff; border:1px solid var(--aep-gray-200); border-radius:8px; padding:12px;
+    }
+    .kv{ display:flex; gap:10px; flex-wrap:nowrap; align-items:center }
+    .kv .k{ color:#5c5c5c; width:140px; font-size:12px; text-transform:uppercase; letter-spacing:.3px }
+    .kv .v{ font-weight:600 }
+
+    /* Preferences chips */
+    .pref-grid{ display:flex; flex-wrap:wrap; gap:8px }
+    .pref-chip{
+      display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:14px; font-size:12px; border:1px solid;
+    }
+    .pref-chip .i{ font-size:14px }
+    .pref-chip.present{ background:var(--ok-bg); border-color:var(--ok-bd); color:var(--ok-tx) }
+    .pref-chip.absent{ background:var(--no-bg); border-color:var(--no-bd); color:var(--no-tx) }
+
     .close-btn, .ghost-btn{
       border:1px solid #cfcfcf; background:#fff; color:#222; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:13px
     }
     .ghost-btn:hover, .close-btn:hover{ background:#f7f7f7 }
-    .empty-row{ color:#888; font-style:italic }
+
+    /* Segmentation dropdown container (uses shared .menu) */
+    .seg-wrap{ position:relative; display:inline-block }
+    .seg-btn{ border:1px solid #cfcfcf; background:#fff; color:#222; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:13px; font-weight:600 }
+    .seg-btn:hover{ background:#f7f7f7 }
+
+    /* Inline notice bar (replaces browser alert) */
+    .notice{
+      display:none; margin:10px 16px 0; border-radius:8px; padding:10px 12px; border:1px solid; font-weight:600;
+    }
+    .notice.ok{ background:var(--ok-bg); border-color:var(--ok-bd); color:var(--ok-tx); }
+    .notice.warn{ background:var(--no-bg); border-color:var(--no-bd); color:var(--no-tx); }
   </style>
 </head>
 <body>
   <!-- Top bar -->
   <header class="topbar" role="banner" aria-label="App header">
     <div class="brand">
-      <div class="logo-tile" aria-hidden="true">A</div>
+      <img class="logo" src="Adobe_Logo.png" alt="Adobe logo" />
       Adobe Experience Platform
     </div>
     <div class="searchbar">
@@ -331,23 +377,35 @@
           <div id="profileSubtitle" class="meta">—</div>
         </div>
       </div>
-      <div style="display:flex; gap:8px;">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div class="seg-wrap">
+          <button id="btnAddToSegment" class="seg-btn">Add to Segment ▾</button>
+          <div id="segMenu" class="menu" aria-label="Marketing Segmentations"></div>
+        </div>
         <button id="btnCopyEmail" class="ghost-btn">Copy Email</button>
         <button id="btnCloseDrawer" class="close-btn">Close ✕</button>
       </div>
     </div>
+
+    <!-- Inline notice bar -->
+    <div id="segNotice" class="notice" role="status" aria-live="polite"></div>
+
     <div class="drawer-body">
+      <!-- Attributes (top band) -->
       <div class="section">
-        <h3>Details</h3>
-        <div class="kv"><div class="k">Full Name</div><div id="d_name">—</div></div>
-        <div class="kv"><div class="k">Email</div><div id="d_email">—</div></div>
-        <div class="kv"><div class="k">City</div><div id="d_city">—</div></div>
-        <div class="kv"><div class="k">Country</div><div id="d_country">—</div></div>
-        <div class="kv"><div class="k">Phone</div><div id="d_phone">—</div></div>
-        <div class="kv"><div class="k">Total Consents</div><div id="d_count">0</div></div>
-        <div class="kv"><div class="k">Last Updated</div><div id="d_updated">—</div></div>
+        <h3>Attributes</h3>
+        <div class="attrs" id="attrsBand">
+          <div class="kv"><div class="k">Full Name</div><div id="d_name" class="v">—</div></div>
+          <div class="kv"><div class="k">Email</div><div id="d_email" class="v">—</div></div>
+          <div class="kv"><div class="k">Phone</div><div id="d_phone" class="v">—</div></div>
+          <div class="kv"><div class="k">City</div><div id="d_city" class="v">—</div></div>
+          <div class="kv"><div class="k">Country</div><div id="d_country" class="v">—</div></div>
+          <div class="kv"><div class="k">Last Updated</div><div id="d_updated" class="v">—</div></div>
+          <div class="kv"><div class="k">Total Consents</div><div id="d_count" class="v">0</div></div>
+        </div>
       </div>
 
+      <!-- Consents (middle) -->
       <div class="section">
         <h3>Consents</h3>
         <div class="table-wrap">
@@ -367,6 +425,12 @@
           </table>
         </div>
       </div>
+
+      <!-- Preferences (bottom) -->
+      <div class="section">
+        <h3>Preferences</h3>
+        <div id="prefsGrid" class="pref-grid" aria-label="Channel Preferences"></div>
+      </div>
     </div>
   </div>
 
@@ -383,6 +447,16 @@ const NAMESPACES = [
   { key: "SMS",     hint: "Filters SUBJECT_ID if it looks like a phone number" },
   { key: "CRMID",   hint: "Filters by ItemInternalId" },
   { key: "Phone",   hint: "Filters SUBJECT_ID for phone-like values" },
+];
+
+/* Marketing Segmentations (invented) with required channels */
+const SEGMENTATIONS = [
+  { name: "High-Value Email Subscribers", channels: ["email"] },
+  { name: "WhatsApp Promos", channels: ["whatsapp"] },
+  { name: "SMS Flash Deals", channels: ["sms","mobile"] },
+  { name: "Social Boost", channels: ["facebook","twitter"] },
+  { name: "Direct Mail Offers", channels: ["mail"] },
+  { name: "Multichannel Nurture", channels: ["email","sms","facebook"] }
 ];
 
 const nsChip = document.getElementById('nsChip');
@@ -405,13 +479,20 @@ const drawer = document.getElementById("profileDrawer");
 const backdrop = document.getElementById("backdrop");
 const btnCloseDrawer = document.getElementById("btnCloseDrawer");
 const btnCopyEmail = document.getElementById("btnCopyEmail");
+const btnAddToSegment = document.getElementById("btnAddToSegment");
+const segMenu = document.getElementById("segMenu");
+const segNotice = document.getElementById("segNotice");
 
 let state = {
   namespace: "Consent",
   allRaw: [],
-  baseRaw: [],      // username-filtered
+  baseRaw: [],      // username-filtered (by experience param)
   profiles: [],
-  filteredProfiles: []
+  filteredProfiles: [],
+  currentProfile: {
+    email: "",
+    channelsPresent: new Set() // computed from preferences
+  }
 };
 
 /* =========================
@@ -450,9 +531,9 @@ function channelIcons(pref){
         const name=(o.name||"").toLowerCase();
         const val=(o.value===true || o.value==="true");
         if (val){
-          if (name==="email") email=true;
-          if (name==="sms") sms=true;
-          if (name==="whatsapp") wa=true;
+          if (name.includes("email")) email=true;
+          if (name.includes("sms")) sms=true;
+          if (name.includes("whatsapp")) wa=true;
         }
       });
     }
@@ -463,15 +544,17 @@ function channelIcons(pref){
   if (sms) icons.push("📱");
   return icons.join(" ");
 }
-function getUsernameFromUrl(){
+
+/* URL param for USERNAME_EMAIL filtering (exact, case-insensitive) */
+function getExperienceFromUrl(){
   const params = new URLSearchParams(location.search);
-  return (params.get("username") || "").trim();
+  return (params.get("experience") || "").trim();
 }
 
 /* =========================
    Namespace menu
 ========================= */
-function renderNamespaceMenu(){
+function buildNamespaceMenu(){
   nsMenu.innerHTML = '';
   NAMESPACES.forEach(ns => {
     const a = document.createElement('a');
@@ -504,7 +587,7 @@ nsClear.addEventListener('click', (e)=>{
   e.stopPropagation();
   state.namespace = "Consent";
   nsValueEl.textContent = "Consent";
-  renderNamespaceMenu();
+  buildNamespaceMenu();
   applyFilterAndGroup();
 });
 
@@ -591,6 +674,15 @@ function showError(msg){
   errorBox.hidden = false;
   errorBox.textContent = msg || "Could not load profiles.";
   tableEl.style.display = "none";
+}
+
+/* Inline notice (replaces browser alert) */
+function showNotice(msg, type='ok'){
+  segNotice.textContent = msg;
+  segNotice.className = 'notice ' + (type === 'ok' ? 'ok' : 'warn');
+  segNotice.style.display = 'block';
+  clearTimeout(segNotice._t);
+  segNotice._t = setTimeout(()=>{ segNotice.style.display = 'none'; }, 4500);
 }
 
 /* =========================
@@ -712,6 +804,25 @@ function purposePillsHTML(items){
     return `<span class="pill" title="${esc(title)}">${icons}${esc(it.name)}</span>`;
   }).join('') + `</div>`;
 }
+
+/* Render preference chips within the Consents table (fix + clearer) */
+function prefsChipsFromArray(prefArr){
+  if (!prefArr || !prefArr.length) return '—';
+  const parts = [];
+  prefArr.forEach(group=>{
+    const groupName = String(group.name || '').trim();
+    const on = (group.options || [])
+      .filter(o => (o.value === true || o.value === "true"))
+      .map(o => String(o.name || '').trim())
+      .filter(Boolean);
+    if (on.length){
+      const label = groupName ? `${groupName}: ${on.join(', ')}` : on.join(', ');
+      parts.push(`<span class="pill" title="${esc(label)}">${esc(label)}</span>`);
+    }
+  });
+  return parts.length ? `<div class="pills">${parts.join('')}</div>` : '—';
+}
+
 function renderTable(rows){
   if (!rows.length){
     tbody.innerHTML = '';
@@ -724,7 +835,7 @@ function renderTable(rows){
 
   tbody.innerHTML = rows.map(p => `
     <tr>
-      <td>${p.Email ? `<a href="#" class="link profile-link" data-email="${esc(p.Email)}">${esc(p.Name)}</a>` : esc(p.Name)}</td>
+      <td>${p.Email ? `<a href="#" class="profile-link" data-email="${esc(p.Email)}">${esc(p.Name)}</a>` : esc(p.Name)}</td>
       <td>${p.Email ? esc(p.Email) : "—"}</td>
       <td>${esc(p.Phone)}</td>
       <td>${esc(p.Country)}</td>
@@ -732,6 +843,65 @@ function renderTable(rows){
       <td>${p.UpdatedAt || "—"}</td>
     </tr>
   `).join('');
+}
+
+/* =========================
+   Preferences (simple detection + icons + green/red)
+========================= */
+const PREF_CATEGORIES = [
+  { key:"email",    label:"Email",    icon:"📧" },
+  { key:"mail",     label:"Mail",     icon:"✉️" },
+  { key:"phone",    label:"Phone",    icon:"☎️" },
+  { key:"mobile",   label:"Mobile",   icon:"📱" },
+  { key:"facebook", label:"Facebook", icon:"📘" },
+  { key:"whatsapp", label:"WhatsApp", icon:"💬" },
+  { key:"twitter",  label:"Twitter",  icon:"🐦" },
+  { key:"sms",      label:"SMS",      icon:"💬" }
+];
+
+/* Build a set of tokens from preferences where option value is truthy */
+function preferenceTokens(prefArr){
+  const tokens = [];
+  (prefArr || []).forEach(group=>{
+    const gname = String(group.name || "").toLowerCase();
+    const opts = group.options || [];
+    let groupHasTrue = false;
+    opts.forEach(o=>{
+      const val = (o.value===true || o.value==="true");
+      const oname = String(o.name || "").toLowerCase();
+      if (val){
+        groupHasTrue = true;
+        tokens.push(oname);
+      }
+    });
+    if (groupHasTrue && gname) tokens.push(gname);
+  });
+  return tokens;
+}
+
+/* Determine presence by substring match on tokens */
+function computeChannelPresence(prefArr){
+  const tokens = preferenceTokens(prefArr);
+  const present = new Set();
+  PREF_CATEGORIES.forEach(cat=>{
+    const key = cat.key; // word to look for
+    const found = tokens.some(t => t.includes(key));
+    if (found) present.add(key);
+  });
+  return present;
+}
+
+function renderPreferencesChips(presentSet){
+  const grid = document.getElementById("prefsGrid");
+  grid.innerHTML = "";
+  PREF_CATEGORIES.forEach(cat=>{
+    const has = presentSet.has(cat.key);
+    const div = document.createElement("div");
+    div.className = `pref-chip ${has ? 'present' : 'absent'}`;
+    div.title = has ? `${cat.label}: allowed` : `${cat.label}: not allowed`;
+    div.innerHTML = `<span class="i">${cat.icon}</span> <span>${esc(cat.label)}</span>`;
+    grid.appendChild(div);
+  });
 }
 
 /* =========================
@@ -765,6 +935,7 @@ function openProfile(email){
   document.getElementById("d_count").textContent = String(items.length);
   document.getElementById("d_updated").textContent = maxUpdated ? fmtDate(new Date(maxUpdated).toISOString()) : "—";
 
+  // Consents table
   const body = document.getElementById("consentsBody");
   body.innerHTML = "";
   if(items.length === 0){
@@ -782,12 +953,19 @@ function openProfile(email){
         <td>${esc(id)}</td>
         <td>${esc(name)}</td>
         <td>${esc(type)}</td>
-        <td>${prefs.length ? '<div class="pills">' + prefs.map(p=>'<span class="pill">'+esc(p.name || String(p))+'</span>').join('') + '</div>' : '—'}</td>
+        <td>${prefsChipsFromArray(prefs)}</td>
         <td>${esc(updated) || "—"}</td>
       `;
       body.appendChild(tr);
     });
   }
+
+  // Preferences chips (channel presence by simple substring)
+  const allPrefs = items.flatMap(it => parsePreferences(it.PREFERENCES || "[]"));
+  const presentSet = computeChannelPresence(allPrefs);
+  state.currentProfile.email = email || "";
+  state.currentProfile.channelsPresent = presentSet;
+  renderPreferencesChips(presentSet);
 
   // open
   backdrop.classList.add("open");
@@ -814,18 +992,54 @@ btnCopyEmail.addEventListener("click", ()=>{
 });
 
 /* =========================
-   Load + username filter + render
+   Segmentation dropdown + validation (inline notice)
+========================= */
+function buildSegMenu(){
+  segMenu.innerHTML = "";
+  SEGMENTATIONS.forEach(seg=>{
+    const a = document.createElement('a');
+    a.href = "#";
+    a.textContent = seg.name + " — channels: " + seg.channels.join(", ");
+    a.addEventListener('click', (e)=>{
+      e.preventDefault();
+      segMenu.classList.remove('open');
+      validateSegmentation(seg);
+    });
+    segMenu.appendChild(a);
+  });
+}
+btnAddToSegment.addEventListener('click', ()=>{
+  segMenu.classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  if (!btnAddToSegment.contains(e.target) && !segMenu.contains(e.target)) {
+    segMenu.classList.remove('open');
+  }
+});
+
+function validateSegmentation(seg){
+  const present = state.currentProfile.channelsPresent || new Set();
+  const missing = seg.channels.filter(ch => !present.has(ch));
+  if (missing.length){
+    showNotice(`Cannot add to "${seg.name}". Missing consent on: ${missing.join(", ")}.`, 'warn');
+  }else{
+    showNotice(`Added "${state.currentProfile.email}" to "${seg.name}".`, 'ok');
+  }
+}
+
+/* =========================
+   Load + experience filter + render
 ========================= */
 async function loadAndRender(){
   showLoading(true);
   try{
     const raw = await fetchData();
 
-    // URL username prefilter (contains, case-insensitive) on USERNAME_EMAIL
-    const username = getUsernameFromUrl().toLowerCase();
+    // URL experience prefilter: exact (case-insensitive) equality on USERNAME_EMAIL
+    const expParam = getExperienceFromUrl().toLowerCase();
     state.allRaw = raw;
-    state.baseRaw = username
-      ? state.allRaw.filter(r => String(r.USERNAME_EMAIL || "").toLowerCase().includes(username))
+    state.baseRaw = expParam
+      ? state.allRaw.filter(r => String(r.USERNAME_EMAIL || "").toLowerCase() === expParam)
       : state.allRaw.slice();
 
     applyFilterAndGroup();
@@ -837,7 +1051,6 @@ async function loadAndRender(){
     console.error(err);
     showError("Could not load profiles. " + (err?.message || ""));
   }finally{
-    // enforce hiding loading regardless of above branches
     showLoading(false);
   }
 
@@ -877,26 +1090,6 @@ tbody.addEventListener("click", function(e){
   }
 });
 
-function renderNamespaceMenuWrapper(){
-  nsMenu.innerHTML = '';
-  NAMESPACES.forEach(ns => {
-    const a = document.createElement('a');
-    a.href = "#";
-    a.role = "option";
-    a.textContent = ns.key + " — " + ns.hint;
-    if (ns.key === state.namespace) a.classList.add('active');
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      state.namespace = ns.key;
-      nsValueEl.textContent = ns.key;
-      nsMenu.classList.remove('open');
-      nsChip.setAttribute('aria-expanded','false');
-      applyFilterAndGroup();
-    });
-    nsMenu.appendChild(a);
-  });
-}
-
 document.getElementById('viewBtn').addEventListener('click', loadAndRender);
 document.getElementById('refreshBtn').addEventListener('click', loadAndRender);
 document.getElementById('clearBtn').addEventListener('click', ()=>{
@@ -909,10 +1102,8 @@ filterInput.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') loadAndRen
 /* Init */
 (function init(){
   nsValueEl.textContent = state.namespace;
-  renderNamespaceMenu();
-  // use the wrapper name here to avoid shadowing
-  function renderNamespaceMenu(){ renderNamespaceMenuWrapper(); }
-  renderNamespaceMenu();
+  buildNamespaceMenu();
+  buildSegMenu();
   loadAndRender();
 })();
 </script>
